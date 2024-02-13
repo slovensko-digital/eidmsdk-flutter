@@ -42,6 +42,10 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
+  Future showTutorial() {
+    throw UnimplementedError('showTutorial() has not been implemented.');
+  }
+
   Future<Map<String, dynamic>?> getCertificates(
       {required List<EIDCertificateIndex> types}) {
     throw UnimplementedError('getCertificates() has not been implemented.');

@@ -26,6 +26,10 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     return result ?? false;
   }
 
+
+  @override
+  Future showTutorial() async => await methodChannel.invokeMethod<bool>('showTutorial', {});
+
   @override
   Future<Map<String, dynamic>?> getCertificates(
       {required List<EIDCertificateIndex> types}) async {

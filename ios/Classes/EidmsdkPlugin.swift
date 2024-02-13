@@ -22,10 +22,10 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
     }
     
     switch call.method {
-    case "getPlatformVersion":
-      result("iOS " + UIDevice.current.systemVersion)
     case "setLogLevel":
       setLogLevel(args: args, result: result)
+    case "showTutorial":
+      showTutorial(result: result)
     case "getCertificates":
       getCertificates(args: args, result: result)
     default:
@@ -42,6 +42,12 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
     eidHandler.setLogLevel(eIDLogLevel(rawValue: rawLogLevel + 1)!)
     
     result(true)
+  }
+  
+  public func showTutorial(result: @escaping FlutterResult) {
+    eidHandler.showTutorial(from: findViewController()) {
+      result(nil)
+    }
   }
   
   public func getCertificates(args: [AnyHashable: Any], result: @escaping FlutterResult) {

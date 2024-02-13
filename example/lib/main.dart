@@ -1,85 +1,84 @@
+import 'dart:convert';
+
 import 'package:eidmsdk/eidmsdk_platform_interface.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:eidmsdk/eidmsdk.dart';
 
 void main() {
-  runApp(const App());
+  runApp(App());
 }
 
-class App extends StatefulWidget {
-  const App({super.key});
-
-  @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  String _platformVersion = 'Unknown';
-  final _eidmsdkPlugin = Eidmsdk();
-
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion = await _eidmsdkPlugin.getPlatformVersion() ??
-          'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
+class App extends StatelessWidget {
+  App({super.key});
 
   @override
   Widget build(BuildContext context) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('eIDmSDK Example'),
-          ),
-          body: Center(
+        home: HomePage(),
+      );
+}
+
+class HomePage extends StatelessWidget {
+  final _eidmsdkPlugin = Eidmsdk();
+
+  HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('eIDmSDK Example'),
+      ),
+      body: SizedBox(
+        height: double.infinity,
+        child: SingleChildScrollView(
+          child: Center(
             child: Column(
               children: [
-                Text('Running on: $_platformVersion\n'),
-                ...EIDCertificateIndex.values.map(
-                  (e) => ElevatedButton(
-                    child: Text('getCertificates(${e.name})'),
-                    onPressed: () async {
-                      final certificates =
-                          await _eidmsdkPlugin.getCertificates(types: [e]);
-                      print(certificates);
-                    },
-                  ),
-                ),
                 ...EIDLogLevel.values.map((e) => ElevatedButton(
                       child: Text('setLogLevel(${e.name})'),
                       onPressed: () async {
                         final result =
                             await _eidmsdkPlugin.setLogLevel(logLevel: e);
                         print(result);
+                        if (!context.mounted) return;
+                        showResult(context, result);
                       },
-                    ))
+                    )),
+                ElevatedButton(
+                  child: const Text('showTutorial()'),
+                  onPressed: () async {
+                    await _eidmsdkPlugin.showTutorial();
+                  },
+                ),
+                ...EIDCertificateIndex.values.map(
+                  (e) => ElevatedButton(
+                    child: Text('getCertificates(${e.name})'),
+                    onPressed: () async {
+                      final result =
+                          await _eidmsdkPlugin.getCertificates(types: [e]);
+                      print(result);
+                      if (!context.mounted) return;
+                      showResult(context, result);
+                    },
+                  ),
+                ),
               ],
             ),
           ),
         ),
-      );
+      ),
+    );
+  }
+
+  void showResult(BuildContext context, dynamic result) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Result"),
+        content: Text(jsonEncode(result)),
+      ),
+    );
+  }
 }
