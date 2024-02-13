@@ -7,9 +7,16 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 class MockEidmsdkPlatform
     with MockPlatformInterfaceMixin
     implements EidmsdkPlatform {
-
   @override
   Future<String?> getPlatformVersion() => Future.value('42');
+
+  @override
+  Future<Map<String, dynamic>?> getCertificates({required List<EIDCertificateIndex> types}) =>
+      Future.value({});
+
+  @override
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) =>
+      Future.value(true);
 }
 
 void main() {

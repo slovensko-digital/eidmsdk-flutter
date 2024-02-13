@@ -1,3 +1,4 @@
+import 'package:eidmsdk/eidmsdk_platform_interface.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -48,24 +49,37 @@ class _AppState extends State<App> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('eIDmSDK Example'),
-        ),
-        body: Center(
-          child: Column(
-            children: [
-              Text('Running on: $_platformVersion\n'),
-              ElevatedButton(
-                child: const Text('Choose certificate'),
-                onPressed: () {},
-              )
-            ],
+  Widget build(BuildContext context) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('eIDmSDK Example'),
+          ),
+          body: Center(
+            child: Column(
+              children: [
+                Text('Running on: $_platformVersion\n'),
+                ...EIDCertificateIndex.values.map(
+                  (e) => ElevatedButton(
+                    child: Text('getCertificates(${e.name})'),
+                    onPressed: () async {
+                      final certificates =
+                          await _eidmsdkPlugin.getCertificates(types: [e]);
+                      print(certificates);
+                    },
+                  ),
+                ),
+                ...EIDLogLevel.values.map((e) => ElevatedButton(
+                      child: Text('setLogLevel(${e.name})'),
+                      onPressed: () async {
+                        final result =
+                            await _eidmsdkPlugin.setLogLevel(logLevel: e);
+                        print(result);
+                      },
+                    ))
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
+      );
 }
