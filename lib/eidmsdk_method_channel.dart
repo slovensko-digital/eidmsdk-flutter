@@ -12,10 +12,6 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   final methodChannel = const MethodChannel('eidmsdk');
 
   @override
-  Future<String?> getPlatformVersion() async =>
-      await methodChannel.invokeMethod<String>('getPlatformVersion');
-
-  @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async {
     final arguments = {
       "logLevel": logLevel.index,

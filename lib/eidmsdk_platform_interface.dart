@@ -34,10 +34,6 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<String?> getPlatformVersion() {
-    throw UnimplementedError('getPlatformVersion() has not been implemented.');
-  }
-
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }

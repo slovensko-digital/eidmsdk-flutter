@@ -1,9 +1,6 @@
 import 'eidmsdk_platform_interface.dart';
 
 class Eidmsdk {
-  Future<String?> getPlatformVersion() =>
-      EidmsdkPlatform.instance.getPlatformVersion();
-
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) =>
       EidmsdkPlatform.instance.setLogLevel(logLevel: logLevel);
 
