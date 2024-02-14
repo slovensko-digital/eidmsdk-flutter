@@ -98,11 +98,13 @@ class HomePage extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: const Text("Result"),
-        content: Text(content),
+        content: SingleChildScrollView(
+          child: Text(content.toString()),
+        ),
         actions: [
           TextButton(
             onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: content));
+              await Clipboard.setData(ClipboardData(text: content.toString()));
             },
             child: const Text('Copy'),
           ),

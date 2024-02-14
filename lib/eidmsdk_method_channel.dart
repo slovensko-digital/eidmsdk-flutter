@@ -51,12 +51,12 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
       "signatureScheme": signatureScheme,
       "dataToSign": dataToSign,
     };
-    final jsonData =
+    final signedData =
         await methodChannel.invokeMethod<String>('signData', arguments);
-    if (jsonData == null) {
+    if (signedData == null) {
       return null;
     }
 
-    return jsonDecode(jsonData);
+    return signedData;
   }
 }
