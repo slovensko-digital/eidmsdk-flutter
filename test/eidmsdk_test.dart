@@ -17,6 +17,13 @@ class MockEidmsdkPlatform
   Future<Map<String, dynamic>?> getCertificates(
           {required List<EIDCertificateIndex> types}) =>
       Future.value({});
+
+  @override
+  Future<String?> signData(
+          {required int certIndex,
+          required String signatureScheme,
+          required String dataToString}) =>
+      Future.value('');
 }
 
 void main() {

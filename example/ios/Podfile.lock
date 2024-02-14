@@ -31,7 +31,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  eidmsdk: a6ab61495e585452cd5b9298340da17f0e7b3b42
+  eidmsdk: 7856887449a2fd22ef48d36f8616f07213b4efeb
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   integration_test: 13825b8a9334a850581300559b8839134b124670
   JWTDecode: 33e5e26e5ddbd21b2065820894c08fef0cad9509

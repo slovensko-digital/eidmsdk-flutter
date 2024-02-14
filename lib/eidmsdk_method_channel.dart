@@ -22,9 +22,9 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     return result ?? false;
   }
 
-
   @override
-  Future showTutorial() async => await methodChannel.invokeMethod<bool>('showTutorial', {});
+  Future showTutorial() async =>
+      await methodChannel.invokeMethod<bool>('showTutorial', {});
 
   @override
   Future<Map<String, dynamic>?> getCertificates(
@@ -34,6 +34,25 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     };
     final jsonData =
         await methodChannel.invokeMethod<String>('getCertificates', arguments);
+    if (jsonData == null) {
+      return null;
+    }
+
+    return jsonDecode(jsonData);
+  }
+
+  @override
+  Future<String?> signData(
+      {required int certIndex,
+      required String signatureScheme,
+      required String dataToString}) async {
+    final arguments = {
+      "certIndex": certIndex,
+      "signatureScheme": signatureScheme,
+      "dataToSing": dataToString,
+    };
+    final jsonData =
+        await methodChannel.invokeMethod<String>('signData', arguments);
     if (jsonData == null) {
       return null;
     }
