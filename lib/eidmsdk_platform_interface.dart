@@ -50,7 +50,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
   Future<String?> signData({
     required int certIndex,
     required String signatureScheme,
-    required String dataToString,
+    required String dataToSign,
   }) {
     throw UnimplementedError('signData() has not been implemented.');
   }

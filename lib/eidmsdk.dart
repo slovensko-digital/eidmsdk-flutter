@@ -9,4 +9,14 @@ class Eidmsdk {
   Future<Map<String, dynamic>?> getCertificates(
           {required List<EIDCertificateIndex> types}) =>
       EidmsdkPlatform.instance.getCertificates(types: types);
+
+  Future<String?> signData({
+    required int certIndex,
+    required String signatureScheme,
+    required String dataToSign,
+  }) =>
+      EidmsdkPlatform.instance.signData(
+          certIndex: certIndex,
+          signatureScheme: signatureScheme,
+          dataToSign: dataToSign);
 }

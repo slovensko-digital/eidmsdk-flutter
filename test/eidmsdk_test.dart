@@ -22,7 +22,7 @@ class MockEidmsdkPlatform
   Future<String?> signData(
           {required int certIndex,
           required String signatureScheme,
-          required String dataToString}) =>
+          required String dataToSign}) =>
       Future.value('');
 }
 

@@ -45,11 +45,11 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   Future<String?> signData(
       {required int certIndex,
       required String signatureScheme,
-      required String dataToString}) async {
+      required String dataToSign}) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
-      "dataToSing": dataToString,
+      "dataToSign": dataToSign,
     };
     final jsonData =
         await methodChannel.invokeMethod<String>('signData', arguments);
