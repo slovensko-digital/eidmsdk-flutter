@@ -1,11 +1,9 @@
 package sk.freevision.eidmsdk
 
-import android.app.Activity
 import android.content.Intent
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -78,10 +76,10 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             StartActivityForResult()
         ) { }
         getCertificatesActivityLauncher = activity.registerForActivityResult(
-            EIDContracts.GetCertificates(), ::onGetCertificatesResult
+            EIDContracts.GetCertificates(), ::onGetCertificatesResult,
         )
         signDataActivityLauncher = activity.registerForActivityResult(
-            StartActivityForResult(), ::onSignDataResult
+            EIDContracts.StartSign(), ::onSignDataResult,
         )
     }
 
@@ -187,29 +185,27 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         result.onSuccess {
             channelResult?.success(it)
         }.onFailure {
-            channelResult?.error( "ERROR_READ_CERTIFICATE", "Chyba pri načítaní podpisového certifikátu.", it.message)
+            channelResult?.error(
+                "ERROR_READ_CERTIFICATE",
+                "Chyba pri načítaní podpisového certifikátu.",
+                it.message,
+            )
         }
 
         channelResult = null
     }
 
-    private fun onSignDataResult(result: ActivityResult) {
-        Log.d(TAG, "signData.callback: result=$(resultCode=${result.resultCode}, data=${result.data?.extras?.keySet()?.toList()})")
-
+    private fun onSignDataResult(result: kotlin.Result<String>) {
         var channelResult by ::signDataResult
 
-        // TODO Extract contract
-        if (result.resultCode == Activity.RESULT_OK) {
-            val signedData = result.data!!.getStringExtra("SIGNED_DATA")
-
-            channelResult?.success(signedData)
-        } else if (result.data?.extras?.containsKey("EXCEPTION") == true) {
-            @Suppress("DEPRECATION")
-            val error = result.data!!.getSerializableExtra("EXCEPTION") as Throwable
-
-            channelResult?.error("ERROR_SIGNING", "Chyba pri podpisovaní.", error.message)
-        } else {
-            channelResult?.error("ERROR_SIGNING", "Invalid result.", null)
+        result.onSuccess {
+            channelResult?.success(it)
+        }.onFailure {
+            channelResult?.error(
+                "ERROR_SIGNING",
+                "Chyba pri podpisovaní.",
+                it.message,
+            )
         }
 
         channelResult = null
