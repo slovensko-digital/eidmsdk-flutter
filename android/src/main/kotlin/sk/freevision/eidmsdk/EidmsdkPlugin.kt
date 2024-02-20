@@ -16,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import sk.eid.eidhandlerpublic.EIDCertificateType
+import sk.eid.eidhandlerpublic.EIDContracts
 import sk.eid.eidhandlerpublic.EIDEnvironment
 import sk.eid.eidhandlerpublic.EIDHandler
 import java.security.MessageDigest
@@ -77,7 +78,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             StartActivityForResult()
         ) { }
         getCertificatesActivityLauncher = activity.registerForActivityResult(
-            StartActivityForResult(), ::onGetCertificatesResult
+            EIDContracts.GetCertificates(), ::onGetCertificatesResult
         )
         signDataActivityLauncher = activity.registerForActivityResult(
             StartActivityForResult(), ::onSignDataResult
@@ -106,7 +107,6 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 /* errorMessage = */ "Error parsing arguments",
                 /* errorDetails = */ call.arguments.toString(),
             )
-
             return
         }
 
@@ -181,23 +181,13 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
     }
 
-    private fun onGetCertificatesResult(result: ActivityResult) {
-        Log.d(TAG, "getCertificates.callback: result=$(resultCode=${result.resultCode}, data=${result.data?.extras?.keySet()?.toList()})")
-
+    private fun onGetCertificatesResult(result: kotlin.Result<String>) {
         var channelResult by ::getCertificatesResult
 
-        // TODO Extract contract
-        if (result.resultCode == Activity.RESULT_OK) {
-            val certificatesJson = result.data!!.getStringExtra("CERTIFICATES")
-
-            channelResult?.success(certificatesJson)
-        } else if (result.data?.extras?.containsKey("EXCEPTION") == true) {
-            @Suppress("DEPRECATION")
-            val error = result.data!!.getSerializableExtra("EXCEPTION") as Throwable
-
-            channelResult?.error("ERROR_READ_CERTIFICATE", "Chyba pri načítaní podpisového certifikátu.", error.message)
-        } else {
-            channelResult?.error("ERROR_READ_CERTIFICATE", "Invalid result.", null)
+        result.onSuccess {
+            channelResult?.success(it)
+        }.onFailure {
+            channelResult?.error( "ERROR_READ_CERTIFICATE", "Chyba pri načítaní podpisového certifikátu.", it.message)
         }
 
         channelResult = null
