@@ -34,7 +34,9 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> setLogLevel({required EIDLogLevel logLevel}) {
+  Future<bool> setLogLevel({
+    required EIDLogLevel logLevel,
+  }) {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
@@ -42,14 +44,18 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('showTutorial() has not been implemented.');
   }
 
-  Future<Map<String, dynamic>?> getCertificates(
-      {required List<EIDCertificateIndex> types}) {
+  // TODO Result shouldn't be nullable; throw Exception instead
+  Future<Map<String, dynamic>?> getCertificates({
+    required List<EIDCertificateIndex> types,
+  }) {
     throw UnimplementedError('getCertificates() has not been implemented.');
   }
 
+  // TODO Result shouldn't be nullable; throw Exception instead
   Future<String?> signData({
     required int certIndex,
     required String signatureScheme,
+    // TODO dataToSign should be base64 encoded or Uint8List instead
     required String dataToSign,
   }) {
     throw UnimplementedError('signData() has not been implemented.');

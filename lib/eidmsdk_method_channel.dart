@@ -27,8 +27,9 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
       await methodChannel.invokeMethod<bool>('showTutorial', {});
 
   @override
-  Future<Map<String, dynamic>?> getCertificates(
-      {required List<EIDCertificateIndex> types}) async {
+  Future<Map<String, dynamic>?> getCertificates({
+    required List<EIDCertificateIndex> types,
+  }) async {
     final arguments = {
       "types": types.map((e) => e.index).toList(),
     };
@@ -42,10 +43,11 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   }
 
   @override
-  Future<String?> signData(
-      {required int certIndex,
-      required String signatureScheme,
-      required String dataToSign}) async {
+  Future<String?> signData({
+    required int certIndex,
+    required String signatureScheme,
+    required String dataToSign,
+  }) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
