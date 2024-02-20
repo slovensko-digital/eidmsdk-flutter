@@ -2,6 +2,7 @@ package sk.freevision.eidmsdk
 
 import android.app.Activity
 import android.content.Intent
+import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
@@ -17,7 +18,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import sk.eid.eidhandlerpublic.EIDCertificateType
 import sk.eid.eidhandlerpublic.EIDEnvironment
 import sk.eid.eidhandlerpublic.EIDHandler
-import java.util.Base64
+import java.security.MessageDigest
 
 /**
  * `EidmsdkPlugin` Android implementation.
@@ -166,10 +167,10 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private fun Result.signData(certIndex: Int, signatureScheme: String, dataToSign: String) {
         signDataResult = this
 
-        val dataToSignB64 = Base64.getEncoder().encodeToString(dataToSign.toByteArray())
-
-        // TODO Fix: Error response from card (SW = 0x6A80: WRONG DATA or FILEHEADER INCONSISTENT), null)
-        // W/org.jmrtd(16101): Unsupported SecurityInfo, oid = 0.4.0.127.0.7.2.2.3.2
+        // Need to generate hash 1st
+        val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
+        val generatedHash: ByteArray = digest.digest(dataToSign.toByteArray())
+        val dataToSignB64 = Base64.encodeToString(generatedHash, Base64.NO_WRAP)
 
         EIDHandler.startSign(
             certIndex = certIndex,
@@ -185,6 +186,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         var channelResult by ::getCertificatesResult
 
+        // TODO Extract contract
         if (result.resultCode == Activity.RESULT_OK) {
             val certificatesJson = result.data!!.getStringExtra("CERTIFICATES")
 
@@ -206,6 +208,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         var channelResult by ::signDataResult
 
+        // TODO Extract contract
         if (result.resultCode == Activity.RESULT_OK) {
             val signedData = result.data!!.getStringExtra("SIGNED_DATA")
 
