@@ -91,7 +91,21 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       return
     }
     
-    let dataToSign = Data(Array(SHA256.hash(data: Data(rawDataToSign.utf8))))
+    guard let isBase64Encoded = args["isBase64Encoded"] as? Bool else {
+      print("\(String(describing: args["isBase64Encoded"])) couldn't be converted to isBase64Encoded")
+      return
+    }
+    
+    lazy var rawData: Data = {
+      if (isBase64Encoded) {
+        Data(base64Encoded: rawDataToSign.data(using: .utf8)!)!
+      } else {
+        Data(rawDataToSign.utf8)
+      }
+    }()
+    
+    
+    let dataToSign = Data(Array(SHA256.hash(data: rawData)))
     
     eidHandler.signData(from: findViewController(), certIndex: certIndex, signatureScheme: signatureScheme, dataToSign: dataToSign.base64EncodedString()) { res in
       switch res {

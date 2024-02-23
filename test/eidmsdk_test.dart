@@ -32,10 +32,12 @@ class MockEidmsdkPlatform
       ));
 
   @override
-  Future<String?> signData(
-          {required int certIndex,
-          required String signatureScheme,
-          required String dataToSign}) =>
+  Future<String?> signData({
+    required int certIndex,
+    required String signatureScheme,
+    required String dataToSign,
+    bool isBase64Encoded = false,
+  }) =>
       Future.value('');
 }
 

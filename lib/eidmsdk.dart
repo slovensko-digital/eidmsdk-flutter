@@ -23,10 +23,12 @@ class Eidmsdk {
     required int certIndex,
     required String signatureScheme,
     required String dataToSign,
+    bool isBase64Encoded = false
   }) =>
       EidmsdkPlatform.instance.signData(
         certIndex: certIndex,
         signatureScheme: signatureScheme,
         dataToSign: dataToSign,
+        isBase64Encoded: isBase64Encoded,
       );
 }

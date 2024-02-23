@@ -125,6 +125,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 certIndex = call.argument("certIndex")!!,
                 signatureScheme = call.argument("signatureScheme")!!,
                 dataToSign = call.argument("dataToSign")!!,
+                isBase64Encoded = call.argument("isBase64Encoded")!!,
             )
 
             else -> result.notImplemented()
@@ -162,12 +163,16 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
     }
 
-    private fun Result.signData(certIndex: Int, signatureScheme: String, dataToSign: String) {
+    private fun Result.signData(certIndex: Int, signatureScheme: String, dataToSign: String, isBase64Encoded: Boolean = false) {
         signDataResult = this
 
         // Need to generate hash 1st
         val digest: MessageDigest = MessageDigest.getInstance("SHA-256")
-        val generatedHash: ByteArray = digest.digest(dataToSign.toByteArray())
+        var finalByteArrayToSign: ByteArray = dataToSign.toByteArray()
+        if (isBase64Encoded) {
+            finalByteArrayToSign = Base64.decode(dataToSign, Base64.DEFAULT)
+        }
+        val generatedHash: ByteArray = digest.digest(finalByteArrayToSign)
         val dataToSignB64 = Base64.encodeToString(generatedHash, Base64.NO_WRAP)
 
         EIDHandler.startSign(

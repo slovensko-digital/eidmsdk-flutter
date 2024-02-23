@@ -48,11 +48,13 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     required int certIndex,
     required String signatureScheme,
     required String dataToSign,
+    bool isBase64Encoded = false
   }) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
       "dataToSign": dataToSign,
+      "isBase64Encoded": isBase64Encoded,
     };
     final signedData =
         await methodChannel.invokeMethod<String>('signData', arguments);

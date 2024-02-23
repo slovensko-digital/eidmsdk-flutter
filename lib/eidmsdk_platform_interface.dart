@@ -58,6 +58,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     required String signatureScheme,
     // TODO dataToSign should be base64 encoded or Uint8List instead
     required String dataToSign,
+    bool isBase64Encoded = false,
   }) {
     throw UnimplementedError('signData() has not been implemented.');
   }
