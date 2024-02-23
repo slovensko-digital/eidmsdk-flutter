@@ -1,3 +1,4 @@
+import 'package:eidmsdk/types.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'eidmsdk_method_channel.dart';
@@ -45,7 +46,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
   }
 
   // TODO Result shouldn't be nullable; throw Exception instead
-  Future<Map<String, dynamic>?> getCertificates({
+  Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
   }) {
     throw UnimplementedError('getCertificates() has not been implemented.');

@@ -59,9 +59,9 @@ class HomePage extends StatelessWidget {
                     onPressed: () async {
                       final result =
                           await _eidmsdkPlugin.getCertificates(types: [e]);
-                      print(result);
+                      print(result?.toJson());
                       if (!context.mounted) return;
-                      showResult(context, jsonEncode(result));
+                      showResult(context, jsonEncode(result?.toJson()));
                     },
                   ),
                 ),

@@ -1,3 +1,4 @@
+import 'package:eidmsdk/types.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:eidmsdk/eidmsdk_platform_interface.dart';
 import 'package:eidmsdk/eidmsdk_method_channel.dart';
@@ -14,9 +15,21 @@ class MockEidmsdkPlatform
   Future showTutorial() => Future.value();
 
   @override
-  Future<Map<String, dynamic>?> getCertificates(
+  Future<CertificatesInfo?> getCertificates(
           {required List<EIDCertificateIndex> types}) =>
-      Future.value({});
+      Future.value(const CertificatesInfo(
+        qscd: true,
+        cardType: "eID",
+        certificates: [
+          Certificate(
+            slot: "QES",
+            supportedSchemes: ["1.2.840.113549.1.1.11"],
+            isQualified: true,
+            certIndex: 1,
+            certData: "data",
+          )
+        ],
+      ));
 
   @override
   Future<String?> signData(

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:eidmsdk/types.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -27,7 +28,7 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
       await methodChannel.invokeMethod<bool>('showTutorial', {});
 
   @override
-  Future<Map<String, dynamic>?> getCertificates({
+  Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
   }) async {
     final arguments = {
@@ -39,7 +40,7 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
       return null;
     }
 
-    return jsonDecode(jsonData);
+    return CertificatesInfo.fromJson(jsonDecode(jsonData));
   }
 
   @override

@@ -1,3 +1,5 @@
+import 'package:eidmsdk/types.dart';
+
 import 'eidmsdk_platform_interface.dart';
 
 class Eidmsdk {
@@ -10,7 +12,7 @@ class Eidmsdk {
 
   Future showTutorial() => EidmsdkPlatform.instance.showTutorial();
 
-  Future<Map<String, dynamic>?> getCertificates({
+  Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
   }) =>
       EidmsdkPlatform.instance.getCertificates(
