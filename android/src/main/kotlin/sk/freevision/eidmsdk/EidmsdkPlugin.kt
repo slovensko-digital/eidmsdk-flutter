@@ -115,10 +115,13 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 logLevel = call.argument("logLevel")!!,
             )
 
-            "showTutorial" -> result.showTutorial()
+            "showTutorial" -> result.showTutorial(
+                language = call.argument("language"),
+            )
 
             "getCertificates" -> result.getCertificates(
                 types = call.argument("types")!!,
+                language = call.argument("language"),
             )
 
             "signData" -> result.signData(
@@ -126,6 +129,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 signatureScheme = call.argument("signatureScheme")!!,
                 dataToSign = call.argument("dataToSign")!!,
                 isBase64Encoded = call.argument("isBase64Encoded")!!,
+                language = call.argument("language"),
             )
 
             else -> result.notImplemented()
@@ -138,16 +142,17 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         success(false)
     }
 
-    private fun Result.showTutorial() {
+    private fun Result.showTutorial(language: String?) {
         EIDHandler.startTutorial(
             activity = activity,
             activityLauncher = startTutorialActivityLauncher,
+            language = language,
         )
 
         success(false)
     }
 
-    private fun Result.getCertificates(types: Collection<Int>) {
+    private fun Result.getCertificates(types: Collection<Int>, language: String?) {
         val type = types.singleOrNull()
 
         requireNotNull(type) { "types has to contain exactly single int value." }
@@ -160,10 +165,17 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             certificateType = certificateType,
             activity = activity,
             activityLauncher = getCertificatesActivityLauncher,
+            language = language,
         )
     }
 
-    private fun Result.signData(certIndex: Int, signatureScheme: String, dataToSign: String, isBase64Encoded: Boolean = false) {
+    private fun Result.signData(
+        certIndex: Int,
+        signatureScheme: String,
+        dataToSign: String,
+        isBase64Encoded: Boolean = false,
+        language: String?
+    ) {
         signDataResult = this
 
         // Need to generate hash 1st
@@ -181,6 +193,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             dataToSign = dataToSignB64,
             activity = activity,
             activityLauncher = signDataActivityLauncher,
+            language = language,
         )
     }
 

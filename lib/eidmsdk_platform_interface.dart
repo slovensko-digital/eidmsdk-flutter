@@ -41,13 +41,14 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
-  Future showTutorial() {
+  Future showTutorial({String? language}) {
     throw UnimplementedError('showTutorial() has not been implemented.');
   }
 
   // TODO Result shouldn't be nullable; throw Exception instead
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
+    String? language,
   }) {
     throw UnimplementedError('getCertificates() has not been implemented.');
   }
@@ -59,6 +60,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     // TODO dataToSign should be base64 encoded or Uint8List instead
     required String dataToSign,
     bool isBase64Encoded = false,
+    String? language,
   }) {
     throw UnimplementedError('signData() has not been implemented.');
   }

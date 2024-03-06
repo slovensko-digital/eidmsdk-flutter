@@ -24,15 +24,22 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   }
 
   @override
-  Future showTutorial() async =>
-      await methodChannel.invokeMethod<bool>('showTutorial', {});
+  Future showTutorial({String? language}) async {
+    final arguments = {
+      "language": language,
+    };
+
+    return await methodChannel.invokeMethod<bool>('showTutorial', arguments);
+  }
 
   @override
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
+    String? language,
   }) async {
     final arguments = {
       "types": types.map((e) => e.index).toList(),
+      "language": language,
     };
     final jsonData =
         await methodChannel.invokeMethod<String>('getCertificates', arguments);
@@ -48,13 +55,15 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     required int certIndex,
     required String signatureScheme,
     required String dataToSign,
-    bool isBase64Encoded = false
+    bool isBase64Encoded = false,
+    String? language,
   }) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
       "dataToSign": dataToSign,
       "isBase64Encoded": isBase64Encoded,
+      "language": language,
     };
     final signedData =
         await methodChannel.invokeMethod<String>('signData', arguments);

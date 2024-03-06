@@ -1,7 +1,7 @@
+import 'package:eidmsdk/eidmsdk_method_channel.dart';
+import 'package:eidmsdk/eidmsdk_platform_interface.dart';
 import 'package:eidmsdk/types.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:eidmsdk/eidmsdk_platform_interface.dart';
-import 'package:eidmsdk/eidmsdk_method_channel.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 class MockEidmsdkPlatform
@@ -12,11 +12,13 @@ class MockEidmsdkPlatform
       Future.value(true);
 
   @override
-  Future showTutorial() => Future.value();
+  Future showTutorial({String? language}) => Future.value();
 
   @override
-  Future<CertificatesInfo?> getCertificates(
-          {required List<EIDCertificateIndex> types}) =>
+  Future<CertificatesInfo?> getCertificates({
+    required List<EIDCertificateIndex> types,
+    String? language,
+  }) =>
       Future.value(const CertificatesInfo(
         qscd: true,
         cardType: "eID",
@@ -37,6 +39,7 @@ class MockEidmsdkPlatform
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
+    String? language,
   }) =>
       Future.value('');
 }

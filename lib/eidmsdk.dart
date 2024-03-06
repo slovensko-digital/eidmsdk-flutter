@@ -10,25 +10,32 @@ class Eidmsdk {
         logLevel: logLevel,
       );
 
-  Future showTutorial() => EidmsdkPlatform.instance.showTutorial();
+  Future showTutorial({String? language}) =>
+      EidmsdkPlatform.instance.showTutorial(
+        language: language,
+      );
 
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
+    String? language,
   }) =>
       EidmsdkPlatform.instance.getCertificates(
         types: types,
+        language: language,
       );
 
   Future<String?> signData({
     required int certIndex,
     required String signatureScheme,
     required String dataToSign,
-    bool isBase64Encoded = false
+    bool isBase64Encoded = false,
+    String? language,
   }) =>
       EidmsdkPlatform.instance.signData(
         certIndex: certIndex,
         signatureScheme: signatureScheme,
         dataToSign: dataToSign,
         isBase64Encoded: isBase64Encoded,
+        language: language,
       );
 }
