@@ -45,7 +45,6 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('showTutorial() has not been implemented.');
   }
 
-  // TODO Result shouldn't be nullable; throw Exception instead
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
     String? language,

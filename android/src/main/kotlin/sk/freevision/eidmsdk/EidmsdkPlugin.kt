@@ -197,18 +197,21 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         )
     }
 
-    private fun onGetCertificatesResult(result: kotlin.Result<String>) {
+    private fun onGetCertificatesResult(result: kotlin.Result<String?>) {
         var channelResult by ::getCertificatesResult
 
-        result.onSuccess {
-            channelResult?.success(it)
-        }.onFailure {
-            channelResult?.error(
-                "ERROR_READ_CERTIFICATE",
-                "Chyba pri načítaní podpisového certifikátu.",
-                it.message,
-            )
-        }
+        result.fold(
+            onSuccess = {
+                channelResult?.success(it)
+            } ,
+            onFailure = {
+                channelResult?.error(
+                    "ERROR_READ_CERTIFICATE",
+                    "Chyba pri načítaní podpisového certifikátu.",
+                    it.message,
+                )
+            }
+        )
 
         channelResult = null
     }

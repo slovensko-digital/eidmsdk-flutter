@@ -12,11 +12,11 @@ import java.io.IOException
 object EIDContracts {
 
     /** Contact for [EIDHandler.getCertificates]. */
-    open class GetCertificates : ActivityResultContract<Intent, Result<String>>() {
+    open class GetCertificates : ActivityResultContract<Intent, Result<String?>>() {
 
         override fun createIntent(context: Context, input: Intent): Intent = input
 
-        override fun parseResult(resultCode: Int, intent: Intent?): Result<String> {
+        override fun parseResult(resultCode: Int, intent: Intent?): Result<String?> {
             Log.d("GetCertificates", "result: resultCode=$resultCode, extras=${intent?.extras?.keySet()?.toList()}")
 
             return if (
@@ -31,7 +31,7 @@ object EIDContracts {
 
                 Result.failure(error)
             } else {
-                Result.failure(IOException("Invalid or empty result."))
+                Result.success(null)
             }
         }
     }
