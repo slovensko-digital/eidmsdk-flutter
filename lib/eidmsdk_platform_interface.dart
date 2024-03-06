@@ -52,7 +52,6 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('getCertificates() has not been implemented.');
   }
 
-  // TODO Result shouldn't be nullable; throw Exception instead
   Future<String?> signData({
     required int certIndex,
     required String signatureScheme,

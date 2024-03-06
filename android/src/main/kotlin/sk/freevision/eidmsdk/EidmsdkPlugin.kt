@@ -216,18 +216,21 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         channelResult = null
     }
 
-    private fun onSignDataResult(result: kotlin.Result<String>) {
+    private fun onSignDataResult(result: kotlin.Result<String?>) {
         var channelResult by ::signDataResult
 
-        result.onSuccess {
-            channelResult?.success(it)
-        }.onFailure {
-            channelResult?.error(
-                "ERROR_SIGNING",
-                "Chyba pri podpisovaní.",
-                it.message,
-            )
-        }
+        result.fold(
+            onSuccess = {
+                channelResult?.success(it)
+            },
+            onFailure = {
+                channelResult?.error(
+                    "ERROR_SIGNING",
+                    "Chyba pri podpisovaní.",
+                    it.message,
+                )
+            }
+        )
 
         channelResult = null
     }

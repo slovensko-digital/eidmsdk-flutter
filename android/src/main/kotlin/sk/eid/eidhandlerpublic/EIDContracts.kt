@@ -5,10 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContract
-import java.io.IOException
 
 /** A set of EID contracts. */
-@Suppress("DEPRECATION")
+@Suppress("DEPRECATION", "unused")
 object EIDContracts {
 
     /** Contact for [EIDHandler.getCertificates]. */
@@ -37,11 +36,11 @@ object EIDContracts {
     }
 
     /** Contact for [EIDHandler.startSign]. */
-    open class StartSign : ActivityResultContract<Intent, Result<String>>() {
+    open class StartSign : ActivityResultContract<Intent, Result<String?>>() {
 
         override fun createIntent(context: Context, input: Intent): Intent = input
 
-        override fun parseResult(resultCode: Int, intent: Intent?): Result<String> {
+        override fun parseResult(resultCode: Int, intent: Intent?): Result<String?> {
             Log.d("SignData", "result: resultCode=$resultCode, extras=${intent?.extras?.keySet()?.toList()}")
 
             return if (
@@ -56,7 +55,7 @@ object EIDContracts {
 
                 Result.failure(error)
             } else {
-                Result.failure(IOException("Invalid or empty result."))
+                Result.success(null)
             }
         }
     }
