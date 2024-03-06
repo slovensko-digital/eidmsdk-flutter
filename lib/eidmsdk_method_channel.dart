@@ -1,4 +1,5 @@
-import 'dart:convert';
+import 'dart:convert' show jsonDecode;
+import 'dart:io' show Platform;
 
 import 'package:eidmsdk/types.dart';
 import 'package:flutter/foundation.dart';
@@ -37,8 +38,13 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     required List<EIDCertificateIndex> types,
     String? language,
   }) async {
+    // TODO Unify type param:
+    // iOS:     ---  QES, ES, Encryption
+    // Android: ALL, QES, ES, ENC
+
+    final offset = (Platform.isAndroid ? 1 : 0); // need to shift "ALL"
     final arguments = {
-      "types": types.map((e) => e.index).toList(),
+      "types": types.map((e) => e.index + offset).toList(),
       "language": language,
     };
     final jsonData =

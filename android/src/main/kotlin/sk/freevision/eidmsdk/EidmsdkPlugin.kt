@@ -153,10 +153,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     private fun Result.getCertificates(types: Collection<Int>, language: String?) {
-        val type = types.singleOrNull()
-
-        requireNotNull(type) { "types has to contain exactly single int value." }
-
+        val type = requireNotNull(types.singleOrNull()) { "types has to contain exactly single int value." }
         val certificateType = EIDCertificateType.values()[type]
 
         getCertificatesResult = this

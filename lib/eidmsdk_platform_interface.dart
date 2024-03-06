@@ -46,6 +46,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
   }
 
   Future<CertificatesInfo?> getCertificates({
+    // TODO Change type to single EIDCertificateIndex because Android supports only single element
     required List<EIDCertificateIndex> types,
     String? language,
   }) {
