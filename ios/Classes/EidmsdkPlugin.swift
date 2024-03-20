@@ -11,17 +11,17 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
     let instance = EidmsdkPlugin(handler: eIDHandler())
     registrar.addMethodCallDelegate(instance, channel: channel)
   }
-  
+
   init(handler: eIDHandler) {
     self.eidHandler = handler
   }
-  
+
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     guard let args = call.arguments as? [AnyHashable: Any] else {
       result(FlutterError(code: "ERROR_PARSE_ARGUMENTS", message: "Error parsing arguments", details: call.arguments.debugDescription))
       return
     }
-    
+
     switch call.method {
     case "setLogLevel":
       setLogLevel(args: args, result: result)
@@ -35,34 +35,34 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       result(FlutterMethodNotImplemented)
     }
   }
-  
+
   public func setLogLevel(args: [AnyHashable: Any], result: @escaping FlutterResult) {
     guard let rawLogLevel = args["logLevel"] as? Int else {
       print("\(String(describing: args["logLevel"])) couldn't be converted to logLevel")
       return
     }
-    
+
     eidHandler.setLogLevel(eIDLogLevel(rawValue: rawLogLevel + 1)!)
-    
+
     result(true)
   }
-  
+
   public func showTutorial(result: @escaping FlutterResult) {
     eidHandler.showTutorial(from: findViewController()) {
       result(nil)
     }
   }
-  
+
   public func getCertificates(args: [AnyHashable: Any], result: @escaping FlutterResult) {
     guard let rawTypes = args["types"] as? [Int] else {
       print("\(String(describing: args["types"])) couldn't be converted to types")
       return
     }
-    
+
     let types: [eIDCertificateIndex] = rawTypes.map { type in
       eIDCertificateIndex(rawValue: type + 1)
     }.compactMap { $0 }
-    
+
     eidHandler.getCertificates(from: findViewController(), types: types) { res in
       switch res {
       case .success(let certificatesJSONString):
@@ -74,39 +74,38 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       }
     }
   }
-  
+
   public func signData(args: [AnyHashable: Any], result: @escaping FlutterResult) {
     guard let certIndex = args["certIndex"] as? Int else {
       print("\(String(describing: args["certIndex"])) couldn't be converted to certIndex")
       return
     }
-    
+
     guard let signatureScheme = args["signatureScheme"] as? String else {
       print("\(String(describing: args["signatureScheme"])) couldn't be converted to signatureScheme")
       return
     }
-    
+
     guard let rawDataToSign = args["dataToSign"] as? String else {
       print("\(String(describing: args["dataToSign"])) couldn't be converted to dataToSign")
       return
     }
-    
+
     guard let isBase64Encoded = args["isBase64Encoded"] as? Bool else {
       print("\(String(describing: args["isBase64Encoded"])) couldn't be converted to isBase64Encoded")
       return
     }
-    
+
     lazy var rawData: Data = {
       if (isBase64Encoded) {
-        Data(base64Encoded: rawDataToSign.data(using: .utf8)!)!
+        return Data(base64Encoded: rawDataToSign.data(using: .utf8)!)!
       } else {
-        Data(rawDataToSign.utf8)
+        return Data(rawDataToSign.utf8)
       }
     }()
-    
-    
+
     let dataToSign = Data(Array(SHA256.hash(data: rawData)))
-    
+
     eidHandler.signData(from: findViewController(), certIndex: certIndex, signatureScheme: signatureScheme, dataToSign: dataToSign.base64EncodedString()) { res in
       switch res {
       case .success(let dataBase64):
@@ -118,7 +117,7 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       }
     }
   }
-  
+
   private func findViewController() -> UIViewController {
     return UIApplication.shared.windows.filter({ (w) -> Bool in
       return w.isHidden == false
