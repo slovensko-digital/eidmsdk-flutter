@@ -4,11 +4,9 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'eidmsdk'
-  s.version          = '0.0.1'
-  s.summary          = 'A new Flutter plugin project.'
-  s.description      = <<-DESC
-eIDmSDK wrapper for Flutter
-                       DESC
+  s.version          = '0.9.0'
+  s.summary          = 'eIDmSDK Flutter'
+  s.description      = 'eIDmSDK wrapper for Flutter'
   s.homepage         = 'https://www.freevision.sk'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'Ahmed Al Hafoudh' => 'alhafoudh@freevision.sk' }
