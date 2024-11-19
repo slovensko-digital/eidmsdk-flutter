@@ -1,3 +1,7 @@
+## 0.9.0
+
+* Update native eID mSDK dependencies
+
 ## 0.0.1
 
-* TODO: Describe initial release.
+* Initial release
