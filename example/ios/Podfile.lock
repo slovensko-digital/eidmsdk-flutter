@@ -1,5 +1,5 @@
 PODS:
-  - eidmsdk (0.0.1):
+  - eidmsdk (0.9.0):
     - Flutter
     - JWTDecode
     - lottie-ios
@@ -31,7 +31,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  eidmsdk: 7856887449a2fd22ef48d36f8616f07213b4efeb
+  eidmsdk: 907312cae65036d456cf4b7b4e190ad94ba72d6a
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   integration_test: 13825b8a9334a850581300559b8839134b124670
   JWTDecode: 33e5e26e5ddbd21b2065820894c08fef0cad9509
