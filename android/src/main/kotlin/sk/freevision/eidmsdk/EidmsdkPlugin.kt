@@ -100,6 +100,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         // Every method call arguments expected it to be Map<String, Any?>
         if (call.arguments !is Map<*, *>) {
+            // TODO use custom .error() fun with IllegalArgumentException
             result.error(
                 /* errorCode = */ "ERROR_PARSE_ARGUMENTS",
                 /* errorMessage = */ "Error parsing arguments",
@@ -202,11 +203,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 channelResult?.success(it)
             } ,
             onFailure = {
-                channelResult?.error(
-                    "ERROR_READ_CERTIFICATE",
-                    "Chyba pri načítaní podpisového certifikátu.",
-                    it.message,
-                )
+                channelResult?.error("Chyba pri načítaní podpisového certifikátu.", it)
             }
         )
 
@@ -221,11 +218,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 channelResult?.success(it)
             },
             onFailure = {
-                channelResult?.error(
-                    "ERROR_SIGNING",
-                    "Chyba pri podpisovaní.",
-                    it.message,
-                )
+                channelResult?.error("Chyba pri podpisovaní.", it)
             }
         )
 
@@ -234,5 +227,14 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     companion object {
         private const val TAG: String = "EidmsdkPlugin"
+    }
+
+    /** Universal error handler for any [Throwable]. */
+    private fun Result.error(message: String, e: Throwable) {
+        error(
+            /* errorCode = */ e.javaClass.simpleName,
+            /* errorMessage = */ message,
+            /* errorDetails = */ e.message,
+        )
     }
 }
