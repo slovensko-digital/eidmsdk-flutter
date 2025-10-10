@@ -1,6 +1,8 @@
-import 'package:eidmsdk/types.dart';
+import 'package:flutter/services.dart';
 
 import 'eidmsdk_platform_interface.dart';
+import 'errors.dart';
+import 'types.dart';
 
 class Eidmsdk {
   Future<bool> setLogLevel({
@@ -18,11 +20,23 @@ class Eidmsdk {
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
     String? language,
-  }) =>
-      EidmsdkPlatform.instance.getCertificates(
+  }) async {
+    try {
+      return await EidmsdkPlatform.instance.getCertificates(
         types: types,
         language: language,
       );
+    } on PlatformException catch (e) {
+      switch (e.code) {
+        case "CertificateNotFoundException":
+        // TODO Implement sending code also in EidmsdkPlugin.swift
+        case "certificatesNotIssued":
+          throw CertificateNotFoundException(e.message ?? '', e.details);
+        default:
+          throw EidmsdkException(e.message ?? '', e.details);
+      }
+    }
+  }
 
   Future<String?> signData({
     required int certIndex,
