@@ -29,7 +29,6 @@ class Eidmsdk {
     } on PlatformException catch (e) {
       switch (e.code) {
         case "CertificateNotFoundException":
-        // TODO Implement sending code also in EidmsdkPlugin.swift
         case "certificatesNotIssued":
           throw CertificateNotFoundException(e.message ?? '', e.details);
         default:
