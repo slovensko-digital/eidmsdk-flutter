@@ -1,28 +1,29 @@
-import 'package:eidmsdk/types.dart';
+import 'package:flutter/services.dart';
 
 import 'eidmsdk_platform_interface.dart';
+import 'errors.dart';
+import 'types.dart';
 
 class Eidmsdk {
-  Future<bool> setLogLevel({
-    required EIDLogLevel logLevel,
-  }) =>
-      EidmsdkPlatform.instance.setLogLevel(
-        logLevel: logLevel,
-      );
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) =>
+      EidmsdkPlatform.instance.setLogLevel(logLevel: logLevel);
 
   Future showTutorial({String? language}) =>
-      EidmsdkPlatform.instance.showTutorial(
-        language: language,
-      );
+      EidmsdkPlatform.instance.showTutorial(language: language);
 
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
     String? language,
-  }) =>
-      EidmsdkPlatform.instance.getCertificates(
+  }) async {
+    try {
+      return await EidmsdkPlatform.instance.getCertificates(
         types: types,
         language: language,
       );
+    } on PlatformException catch (e) {
+      decodeNativeError(e);
+    }
+  }
 
   Future<String?> signData({
     required int certIndex,
@@ -30,12 +31,28 @@ class Eidmsdk {
     required String dataToSign,
     bool isBase64Encoded = false,
     String? language,
-  }) =>
-      EidmsdkPlatform.instance.signData(
+  }) async {
+    try {
+      return await EidmsdkPlatform.instance.signData(
         certIndex: certIndex,
         signatureScheme: signatureScheme,
         dataToSign: dataToSign,
         isBase64Encoded: isBase64Encoded,
         language: language,
       );
+    } on PlatformException catch (e) {
+      decodeNativeError(e);
+    }
+  }
+
+  static Never decodeNativeError(PlatformException e) {
+    switch (e.code) {
+      case "CertificateNotFoundException":
+      case "certificatesNotIssued":
+        throw CertificateNotFoundException(e.message ?? '', e.details);
+
+      default:
+        throw EidmsdkException(e.message ?? '', e.details);
+    }
+  }
 }

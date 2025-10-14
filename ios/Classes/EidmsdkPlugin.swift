@@ -68,7 +68,7 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       case .success(let certificatesJSONString):
         result(certificatesJSONString)
       case .failure(let error):
-        result(FlutterError(code: "ERROR_READ_CERTIFICATE",
+        result(FlutterError(code: String(describing: error),
                             message: "Chyba pri načítaní podpisového certifikátu.",
                             details: error.localizedDescription))
       }
@@ -111,7 +111,7 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       case .success(let dataBase64):
         result(dataBase64)
       case .failure(let error):
-        result(FlutterError(code: "ERROR_SIGNING",
+        result(FlutterError(code: String(describing: error),
                             message: "Chyba pri podpisovaní.",
                             details: error.localizedDescription))
       }
