@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'eidmsdk'
-  s.version          = '0.9.1'
+  s.version          = '1.0.0'
   s.summary          = 'eIDmSDK Flutter'
   s.description      = 'eIDmSDK wrapper for Flutter'
   s.homepage         = 'https://www.freevision.sk'
