@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 
 android {
     namespace "sk.freevision.eidmsdk_example"
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {
