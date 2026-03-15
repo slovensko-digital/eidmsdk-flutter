@@ -48,7 +48,7 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
   }
 
   public func showTutorial(result: @escaping FlutterResult) {
-    eidHandler.showTutorial(from: findViewController()) {
+    eidHandler.showTutorial(from: findViewController(), environment: .minvProd,) {
       result(nil)
     }
   }
