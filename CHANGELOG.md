@@ -1,3 +1,16 @@
+# 1.1.0
+
+* Support running on the iOS Simulator and the Android emulator.
+* iOS: ship the mSDK as `eID.xcframework`, pairing the real device slice with a
+  stub simulator slice, so the plugin can be built for the Simulator at all.
+  Regenerate with `tools/build_eid_stub.sh`.
+* Add `SimulatorEidmsdk`, a fake implementation substituted automatically on a
+  simulated host. It returns canned certificates and **no real signatures**;
+  `signData` throws until hardcoded keystore signing is implemented.
+* Add `Eidmsdk.isUsingFake()` and `Eidmsdk.ensureInitialized()`.
+* `package:eidmsdk/eidmsdk.dart` now exports the enums, model and error types, so
+  importing the platform-interface file directly is no longer necessary.
+
 # 1.0.0
 
 * Update native eID mSDK dependencies

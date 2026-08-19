@@ -13,6 +13,16 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('eidmsdk');
 
+  /// Whether the host is an iOS Simulator or an Android emulator.
+  ///
+  /// Deliberately not on [EidmsdkPlatform]: this is a method-channel concern,
+  /// and no other implementation needs to answer it.
+  Future<bool> isSimulator() async {
+    final result = await methodChannel.invokeMethod<bool>('isSimulator');
+
+    return result ?? false;
+  }
+
   @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async {
     final arguments = {

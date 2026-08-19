@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:eidmsdk/eidmsdk_platform_interface.dart';
-import 'package:flutter/material.dart';
-
 import 'package:eidmsdk/eidmsdk.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
@@ -37,47 +35,44 @@ class HomePage extends StatelessWidget {
           child: Center(
             child: Column(
               children: [
+                const _FakeSdkBanner(),
                 ...EIDLogLevel.values.map((e) => ElevatedButton(
                       child: Text('setLogLevel(logLevel: ${e.name})'),
-                      onPressed: () async {
-                        final result =
-                            await _eidmsdkPlugin.setLogLevel(logLevel: e);
-                        print(result);
-                        if (!context.mounted) return;
-                        showResult(context, result);
-                      },
+                      onPressed: () => _run(
+                        context,
+                        () => _eidmsdkPlugin.setLogLevel(logLevel: e),
+                      ),
                     )),
                 ElevatedButton(
                   child: const Text('showTutorial()'),
-                  onPressed: () async {
-                    await _eidmsdkPlugin.showTutorial();
-                  },
+                  onPressed: () => _run(
+                    context,
+                    () => _eidmsdkPlugin.showTutorial(),
+                    showSuccess: false,
+                  ),
                 ),
                 ...EIDCertificateIndex.values.map(
                   (e) => ElevatedButton(
                     child: Text('getCertificates(types: [${e.name}])'),
-                    onPressed: () async {
+                    onPressed: () => _run(context, () async {
                       final result =
                           await _eidmsdkPlugin.getCertificates(types: [e]);
-                      print(result?.toJson());
-                      if (!context.mounted) return;
-                      showResult(context, jsonEncode(result?.toJson()));
-                    },
+
+                      return jsonEncode(result?.toJson());
+                    }),
                   ),
                 ),
                 ElevatedButton(
                   child: const Text(
                       'signData(certIndex: 1, dataToSign: "hello world")'),
-                  onPressed: () async {
-                    final result = await _eidmsdkPlugin.signData(
-                        certIndex: 1,
-                        signatureScheme: "1.2.840.113549.1.1.11",
-                        dataToSign: "hello world");
-                    print(result);
-                    if (!context.mounted) return;
-
-                    showResult(context, result);
-                  },
+                  onPressed: () => _run(
+                    context,
+                    () => _eidmsdkPlugin.signData(
+                      certIndex: 1,
+                      signatureScheme: "1.2.840.113549.1.1.11",
+                      dataToSign: "hello world",
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   child: const Text('showResult'),
@@ -91,6 +86,29 @@ class HomePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Runs [action] and surfaces whatever comes back -- including thrown
+  /// [EidmsdkException]s, which is how the simulator reports that signing is not
+  /// implemented.
+  Future<void> _run(
+    BuildContext context,
+    Future<dynamic> Function() action, {
+    bool showSuccess = true,
+  }) async {
+    dynamic outcome;
+    try {
+      final result = await action();
+      if (!showSuccess) return;
+      outcome = result;
+    } catch (e) {
+      outcome = e;
+    }
+
+    debugPrint(outcome.toString());
+    if (!context.mounted) return;
+
+    showResult(context, outcome);
   }
 
   void showResult(BuildContext context, dynamic content) {
@@ -114,6 +132,34 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Shown only when the fake implementation is standing in for the real SDK, so
+/// that a canned certificate is never mistaken for one read off a real card.
+class _FakeSdkBanner extends StatelessWidget {
+  const _FakeSdkBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: Eidmsdk.isUsingFake(),
+      builder: (context, snapshot) {
+        if (snapshot.data != true) return const SizedBox.shrink();
+
+        return Container(
+          width: double.infinity,
+          color: Colors.orange.shade100,
+          padding: const EdgeInsets.all(12),
+          child: Text(
+            'Simulator detected: using the FAKE eID SDK.\n'
+            'Certificates are canned and signing is not implemented.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.orange.shade900),
+          ),
+        );
+      },
     );
   }
 }

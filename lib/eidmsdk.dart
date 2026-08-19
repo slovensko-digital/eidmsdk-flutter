@@ -1,22 +1,93 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'eidmsdk_method_channel.dart';
 import 'eidmsdk_platform_interface.dart';
+import 'eidmsdk_simulator.dart';
 import 'errors.dart';
 import 'types.dart';
 
-class Eidmsdk {
-  Future<bool> setLogLevel({required EIDLogLevel logLevel}) =>
-      EidmsdkPlatform.instance.setLogLevel(logLevel: logLevel);
+export 'eidmsdk_platform_interface.dart'
+    show EidmsdkPlatform, EIDLogLevel, EIDCertificateIndex;
+export 'eidmsdk_method_channel.dart' show MethodChannelEidmsdk;
+export 'eidmsdk_simulator.dart' show SimulatorEidmsdk;
+export 'errors.dart';
+export 'types.dart';
 
-  Future showTutorial({String? language}) =>
-      EidmsdkPlatform.instance.showTutorial(language: language);
+class Eidmsdk {
+  /// Memoised platform resolution.
+  ///
+  /// The [EidmsdkPlatform.instance] getter is synchronous, but deciding whether
+  /// this is a simulated host requires a round trip to the native side. Caching
+  /// the [Future] rather than its value means concurrent first calls all await
+  /// the same detection instead of racing or repeating it.
+  static Future<EidmsdkPlatform>? _platformFuture;
+
+  /// Forces the simulator decision, bypassing native detection. Lets both
+  /// branches be tested off-simulator.
+  @visibleForTesting
+  static bool? debugForceSimulator;
+
+  static Future<EidmsdkPlatform> _platform() =>
+      _platformFuture ??= _resolvePlatform();
+
+  static Future<EidmsdkPlatform> _resolvePlatform() async {
+    final current = EidmsdkPlatform.instance;
+
+    // Anything explicitly assigned by the host app wins outright.
+    if (current is! MethodChannelEidmsdk) {
+      return current;
+    }
+
+    bool isSimulated;
+    try {
+      isSimulated = debugForceSimulator ?? await current.isSimulator();
+    } catch (_) {
+      // Fail closed. If detection cannot be completed for any reason, keep the
+      // real implementation: a fake must never stand in on real hardware.
+      isSimulated = false;
+    }
+
+    if (!isSimulated) {
+      return current;
+    }
+
+    debugPrint('eidmsdk: simulator/emulator detected, using SimulatorEidmsdk. '
+        'THIS IS A FAKE - it returns canned certificates and no real signatures.');
+
+    return SimulatorEidmsdk();
+  }
+
+  /// Resolves the platform implementation up front.
+  ///
+  /// Optional: every method below resolves on demand. Useful from `main()` when
+  /// you want detection out of the way before the first frame.
+  static Future<void> ensureInitialized() async {
+    await _platform();
+  }
+
+  /// Whether calls are being served by the fake [SimulatorEidmsdk].
+  static Future<bool> isUsingFake() async =>
+      await _platform() is SimulatorEidmsdk;
+
+  @visibleForTesting
+  static void resetForTesting() {
+    _platformFuture = null;
+    debugForceSimulator = null;
+  }
+
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) async =>
+      (await _platform()).setLogLevel(logLevel: logLevel);
+
+  Future showTutorial({String? language}) async =>
+      (await _platform()).showTutorial(language: language);
 
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
     String? language,
   }) async {
     try {
-      return await EidmsdkPlatform.instance.getCertificates(
+      return await (await _platform()).getCertificates(
         types: types,
         language: language,
       );
@@ -33,7 +104,7 @@ class Eidmsdk {
     String? language,
   }) async {
     try {
-      return await EidmsdkPlatform.instance.signData(
+      return await (await _platform()).signData(
         certIndex: certIndex,
         signatureScheme: signatureScheme,
         dataToSign: dataToSign,

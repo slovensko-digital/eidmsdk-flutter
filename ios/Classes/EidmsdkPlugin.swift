@@ -17,6 +17,17 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    // Answered before the argument check below, because it takes no arguments.
+    // This is a compile-time answer, so it can never report true on real hardware.
+    if call.method == "isSimulator" {
+      #if targetEnvironment(simulator)
+        result(true)
+      #else
+        result(false)
+      #endif
+      return
+    }
+
     guard let args = call.arguments as? [AnyHashable: Any] else {
       result(FlutterError(code: "ERROR_PARSE_ARGUMENTS", message: "Error parsing arguments", details: call.arguments.debugDescription))
       return

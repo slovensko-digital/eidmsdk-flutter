@@ -1,6 +1,7 @@
 package sk.freevision.eidmsdk
 
 import android.content.Intent
+import android.os.Build
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -98,6 +99,12 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onMethodCall(call: MethodCall, result: Result) {
         Log.d(TAG, "onMethodCall: call=(method=${call.method}, arguments=${call.arguments})")
 
+        // Answered before the argument check below, because it takes no arguments.
+        if (call.method == "isSimulator") {
+            result.success(isEmulator())
+            return
+        }
+
         // Every method call arguments expected it to be Map<String, Any?>
         if (call.arguments !is Map<*, *>) {
             // TODO use custom .error() fun with IllegalArgumentException
@@ -136,6 +143,26 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             else -> result.notImplemented()
         }
     }
+
+    /**
+     * Whether this build is running on an emulator rather than a real device.
+     *
+     * The eID mSDK needs NFC and a physical ID card, so on an emulator the Dart
+     * side substitutes a fake implementation. Heuristic by necessity -- there is
+     * no supported API for this -- but it only ever needs to be correct in the
+     * negative direction: a false positive on real hardware would let a fake
+     * implementation run, so the checks below are deliberately restricted to
+     * markers that shipping devices do not carry.
+     */
+    private fun isEmulator(): Boolean =
+        Build.HARDWARE in setOf("goldfish", "ranchu", "gce_x86") ||
+            Build.FINGERPRINT.startsWith("generic") ||
+            Build.FINGERPRINT.startsWith("unknown") ||
+            Build.MODEL.startsWith("sdk_gphone") ||
+            Build.MODEL.contains("Emulator") ||
+            Build.MODEL.contains("Android SDK built for") ||
+            Build.PRODUCT == "google_sdk" ||
+            Build.MANUFACTURER.contains("Genymotion")
 
     private fun Result.setLogLevel(@Suppress("UNUSED_PARAMETER") logLevel: Int) {
         Log.w(TAG, "Not supported in Android.")
