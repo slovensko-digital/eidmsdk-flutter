@@ -50,3 +50,48 @@ Because the fake replaces `MethodChannelEidmsdk` wholesale rather than sitting
 behind it, it does not reproduce the Android-only certificate-type offset, the
 native SHA-256 pre-hashing of `dataToSign`, real `PlatformException` codes, or
 Android's "user cancelled" `null` result.
+
+
+## Development
+
+Flutter is pinned with [FVM](https://fvm.app) (`.fvmrc`), so prefix commands with
+`fvm`.
+
+```sh
+fvm flutter test                      # plugin unit tests
+cd example && fvm flutter test        # example widget test
+
+# End-to-end against a simulator or emulator. Also covers the native
+# `isSimulator` implementations, which the unit tests mock out.
+cd example && fvm flutter test integration_test -d <simulator-or-emulator-id>
+```
+
+Regenerate the iOS xcframework after updating the vendor SDK or changing
+`tools/eid-stub/eID.swift`:
+
+```sh
+tools/build_eid_stub.sh
+```
+
+A stale stub does not fail silently: the plugin compiles against the *real*
+framework for device builds, so a vendor API change breaks the device build, and a
+newly used SDK symbol breaks the simulator build. Both are compile-time failures.
+
+Outstanding work is tracked in [TODO.md](TODO.md).
+
+### Troubleshooting
+
+**Android: `Error resolving plugin [id: 'dev.flutter.flutter-plugin-loader'] > 25.0.2`**
+
+The trailing number is a *JDK* version, not a plugin version. Flutter defaults to
+Android Studio's bundled JDK, and Gradle 8.14.4 does not support Java 25. Note that
+setting `JAVA_HOME` does **not** help, because Flutter prefers Android Studio's JDK
+over it — use Flutter's own setting instead:
+
+```sh
+fvm flutter config --jdk-dir="$(/usr/libexec/java_home -v 21)"
+```
+
+Verify with `fvm flutter doctor -v | grep "Java version"`. Unset it again with
+`fvm flutter config --jdk-dir=`.
+
