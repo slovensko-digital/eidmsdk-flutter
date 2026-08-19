@@ -17,7 +17,7 @@ Pod::Spec.new do |s|
   s.source_files = 'Classes/**/*'
   s.dependency 'Flutter'
   s.platform = :ios, '14.0'
-  s.vendored_frameworks = 'Frameworks/eID.framework'
+  s.vendored_frameworks = 'Frameworks/eID.xcframework'
   s.dependency 'OpenSSL-Universal'
   s.dependency 'JWTDecode'
   s.dependency 'lottie-ios'

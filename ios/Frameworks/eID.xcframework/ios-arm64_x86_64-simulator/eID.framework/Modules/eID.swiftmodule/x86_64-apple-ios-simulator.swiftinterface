@@ -1,0 +1,116 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 6.2.4 effective-5.10 (swiftlang-6.2.4.1.4 clang-1700.6.4.2)
+// swift-module-flags: -target x86_64-apple-ios14.0-simulator -enable-objc-interop -enable-library-evolution -swift-version 5 -O -module-name eID
+// swift-module-flags-ignorable:  -formal-cxx-interoperability-mode=off -interface-compiler-version 6.2.4
+import Foundation
+import Swift
+import UIKit
+import _Concurrency
+import _StringProcessing
+import _SwiftConcurrencyShims
+public enum eIDLogLevel : Swift.Int, Swift.CaseIterable {
+  case verbose
+  case debug
+  case info
+  case warning
+  case error
+  case none
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias AllCases = [eID.eIDLogLevel]
+  public typealias RawValue = Swift.Int
+  nonisolated public static var allCases: [eID.eIDLogLevel] {
+    get
+  }
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+public enum eIDCertificateIndex : Swift.Int, Swift.Codable, Swift.CaseIterable {
+  case QES
+  case ES
+  case Encryption
+  #if compiler(>=5.3) && $NonescapableTypes
+  public init?(rawValue: Swift.Int)
+  #endif
+  public typealias AllCases = [eID.eIDCertificateIndex]
+  public typealias RawValue = Swift.Int
+  nonisolated public static var allCases: [eID.eIDCertificateIndex] {
+    get
+  }
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@frozen public enum eIDEnvironment {
+  case minvTest
+  case minvProd
+  public static func == (a: eID.eIDEnvironment, b: eID.eIDEnvironment) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public enum eIDError : Swift.Error, Swift.Equatable {
+  case unknownTag
+  case unsupportedCardType
+  case nfcNotSupported
+  case jailbreakDetected
+  case certificatesNotIssued
+  case qrNotSupported
+  case usedTCTokenQRCode
+  case deeplinkNotSupported
+  case invalidClientIdOrSecret
+  case unsupportedSignatureScheme
+  case invalidCertificateIndex
+  case unsupportedSigningCertificate
+  case unsupportedDecryptionCertificate
+  case unsupportedSDKVersion
+  case tagConnectionLost
+  case cancelledByUser
+  case sessionTimeout
+  case certificateReadFailed
+  case userDataReadFailed
+  case signingFailed
+  case decryptionFailed
+  case authInitFailed
+  case authCompletionFailed
+  case unableToReadCodeStates
+  case networkError(Swift.String)
+  case bokInvalid
+  case bokSuspended
+  case bokBlocked
+  case bokNotActivated
+  case canInvalid
+  case mrzInvalid
+  case kepPinInvalid
+  case kepPinSuspended
+  case kepPinBlocked
+  case kepPinNotActivated
+  public static func == (a: eID.eIDError, b: eID.eIDError) -> Swift.Bool
+}
+public class eIDHandler {
+  public init()
+  public func setLogLevel(_ logLevel: eID.eIDLogLevel)
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func showTutorial(from viewController: UIKit.UIViewController, environment: eID.eIDEnvironment, completion: (() -> ())? = nil)
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func getCertificates(from viewController: UIKit.UIViewController, types: [eID.eIDCertificateIndex], completion: @escaping (Swift.Result<Swift.String, eID.eIDError>) -> ())
+  #endif
+  #if compiler(>=5.3) && $NonescapableTypes
+  public func signData(from viewController: UIKit.UIViewController, certIndex: Swift.Int, signatureScheme: Swift.String, dataToSign: Swift.String, completion: @escaping (Swift.Result<Swift.String, eID.eIDError>) -> ())
+  #endif
+  @objc deinit
+}
+extension eID.eIDLogLevel : Swift.Equatable {}
+extension eID.eIDLogLevel : Swift.Hashable {}
+extension eID.eIDLogLevel : Swift.RawRepresentable {}
+extension eID.eIDCertificateIndex : Swift.Equatable {}
+extension eID.eIDCertificateIndex : Swift.Hashable {}
+extension eID.eIDCertificateIndex : Swift.RawRepresentable {}
+extension eID.eIDEnvironment : Swift.Equatable {}
+extension eID.eIDEnvironment : Swift.Hashable {}
+extension eID.eIDEnvironment : Swift.Sendable {}
+extension eID.eIDEnvironment : Swift.BitwiseCopyable {}
