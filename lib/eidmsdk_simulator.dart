@@ -108,7 +108,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
 
   @override
   Future<CertificatesInfo?> getCertificates({
-    required List<EIDCertificateIndex> types,
+    required EIDCertificateIndex type,
     String? language,
   }) async {
     await _assertSimulated();
@@ -118,7 +118,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     );
 
     return switch (outcome) {
-      // There is exactly one hardcoded identity, so the requested types are
+      // There is exactly one hardcoded identity, so the requested [type] is
       // not honoured: the QES certificate is always what comes back.
       FakeProceed() => const CertificatesInfo(
         qscd: true,

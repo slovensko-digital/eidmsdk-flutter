@@ -128,7 +128,7 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
 
             "getCertificates" -> result.getCertificates(
-                types = call.argument("types")!!,
+                type = call.argument("type")!!,
                 language = call.argument("language"),
             )
 
@@ -180,9 +180,19 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         success(false)
     }
 
-    private fun Result.getCertificates(types: Collection<Int>, language: String?) {
-        val type = requireNotNull(types.singleOrNull()) { "types has to contain exactly single int value." }
-        val certificateType = EIDCertificateType.values()[type]
+    private fun Result.getCertificates(type: Int, language: String?) {
+        // The wire value is the Dart EIDCertificateIndex index (qes = 0), while
+        // EIDCertificateType leads with an extra ALL member, so shift past it.
+        val certificateType = EIDCertificateType.entries.getOrNull(type + 1)
+        if (certificateType == null) {
+            error(
+                /* errorCode = */ "ERROR_INVALID_CERTIFICATE_TYPE",
+                /* errorMessage = */ "Unknown certificate type",
+                /* errorDetails = */ type.toString(),
+            )
+
+            return
+        }
 
         getCertificatesResult = this
 

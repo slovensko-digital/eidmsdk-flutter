@@ -26,7 +26,7 @@ void main() {
     FakeUi.autoRespond = const FakeProceed();
 
     final result = await platform.getCertificates(
-      types: [EIDCertificateIndex.qes],
+      type: EIDCertificateIndex.qes,
     );
 
     expect(result, isNotNull);
@@ -45,7 +45,7 @@ void main() {
 
       // Through Eidmsdk, which applies the same mapping as for device errors.
       await expectLater(
-        Eidmsdk().getCertificates(types: [EIDCertificateIndex.qes]),
+        Eidmsdk().getCertificates(type: EIDCertificateIndex.qes),
         throwsA(isA<CertificateNotFoundException>()),
       );
     },
@@ -56,7 +56,7 @@ void main() {
     FakeHostPlatform.debugIsAndroidOverride = true;
 
     expect(
-      await Eidmsdk().getCertificates(types: [EIDCertificateIndex.qes]),
+      await Eidmsdk().getCertificates(type: EIDCertificateIndex.qes),
       isNull,
     );
   });
@@ -66,7 +66,7 @@ void main() {
     FakeHostPlatform.debugIsAndroidOverride = false;
 
     await expectLater(
-      Eidmsdk().getCertificates(types: [EIDCertificateIndex.qes]),
+      Eidmsdk().getCertificates(type: EIDCertificateIndex.qes),
       throwsA(isA<EidmsdkException>()),
     );
   });

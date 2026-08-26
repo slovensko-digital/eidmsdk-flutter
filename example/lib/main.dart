@@ -53,10 +53,10 @@ class HomePage extends StatelessWidget {
                 ),
                 ...EIDCertificateIndex.values.map(
                   (e) => ElevatedButton(
-                    child: Text('getCertificates(types: [${e.name}])'),
+                    child: Text('getCertificates(type: ${e.name})'),
                     onPressed: () => _run(context, () async {
                       final result =
-                          await _eidmsdkPlugin.getCertificates(types: [e]);
+                          await _eidmsdkPlugin.getCertificates(type: e);
 
                       return jsonEncode(result?.toJson());
                     }),

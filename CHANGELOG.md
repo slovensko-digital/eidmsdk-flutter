@@ -1,3 +1,23 @@
+# 2.0.0
+
+**Breaking:** `getCertificates` now takes a single `type` instead of a
+`types` list. Android only ever supported one, and the list gave callers a
+shape the platform could not honour. Replace `types: [EIDCertificateIndex.qes]`
+with `type: EIDCertificateIndex.qes`.
+
+* Fix iOS requesting the wrong certificate. `eIDCertificateIndex` is 0-based, but
+  the plugin added 1 to it, so asking for `qes` returned the `ES` certificate,
+  `es` returned `Encryption`, and `encryption` was silently dropped. Nobody
+  could read their QES certificate on iOS.
+* Fix `setLogLevel` crashing on iOS. The same off-by-one made
+  `EIDLogLevel.none` produce an out-of-range raw value, which was then
+  force-unwrapped. Invalid levels now return an error instead of crashing.
+* The certificate type is sent as the Dart enum's own index and mapped to each
+  SDK's enum natively, so there is no longer a platform-dependent offset in
+  Dart. `eidmsdk_method_channel.dart` no longer imports `dart:io`.
+* Android returns an `ERROR_INVALID_CERTIFICATE_TYPE` error for an unknown
+  certificate type rather than throwing `IndexOutOfBoundsException`.
+
 # 1.2.0
 
 * Simulator fake is now interactive: `showTutorial`, `getCertificates` and

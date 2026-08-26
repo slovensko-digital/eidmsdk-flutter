@@ -1,5 +1,4 @@
 import 'dart:convert' show jsonDecode;
-import 'dart:io' show Platform;
 
 import 'package:eidmsdk/types.dart';
 import 'package:flutter/foundation.dart';
@@ -45,16 +44,16 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
 
   @override
   Future<CertificatesInfo?> getCertificates({
-    required List<EIDCertificateIndex> types,
+    required EIDCertificateIndex type,
     String? language,
   }) async {
-    // TODO Unify type param:
-    // iOS:     ---  QES, ES, Encryption
-    // Android: ALL, QES, ES, ENC
-
-    final offset = (Platform.isAndroid ? 1 : 0); // need to shift "ALL"
+    // The wire value is this enum's own index; each native side maps it to
+    // whatever its SDK expects. iOS indexes eIDCertificateIndex directly, while
+    // Android shifts past the extra leading ALL member of EIDCertificateType.
+    // Keeping that mapping native-side is what lets this be one plain value
+    // rather than a platform-dependent offset computed here.
     final arguments = {
-      "types": types.map((e) => e.index + offset).toList(),
+      "type": type.index,
       "language": language,
     };
     final jsonData =

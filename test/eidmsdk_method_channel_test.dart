@@ -71,9 +71,24 @@ void main() {
     expect(log.single.arguments, {'logLevel': EIDLogLevel.warning.index});
   });
 
+  test('getCertificates sends the enum index as a single type', () async {
+    // Pins the wire contract both natives decode. This is the shape the
+    // iOS off-by-one got wrong: eIDCertificateIndex is 0-based, so `qes` must
+    // go over the wire as 0, not 1. Each native maps this index onto its own
+    // SDK enum, so a change here silently breaks one platform.
+    for (final type in EIDCertificateIndex.values) {
+      log.clear();
+      await platform.getCertificates(type: type, language: 'sk');
+
+      expect(log.single.arguments, {'type': type.index, 'language': 'sk'});
+    }
+
+    expect(EIDCertificateIndex.qes.index, 0);
+  });
+
   test('getCertificates decodes the JSON string payload', () async {
     final result =
-        await platform.getCertificates(types: [EIDCertificateIndex.qes]);
+        await platform.getCertificates(type: EIDCertificateIndex.qes);
 
     expect(result, isNotNull);
     expect(result!.qscd, isTrue);
@@ -86,7 +101,7 @@ void main() {
         .setMockMethodCallHandler(channel, (call) async => null);
 
     expect(
-      await platform.getCertificates(types: [EIDCertificateIndex.qes]),
+      await platform.getCertificates(type: EIDCertificateIndex.qes),
       isNull,
     );
   });

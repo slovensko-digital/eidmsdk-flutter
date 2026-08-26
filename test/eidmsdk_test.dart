@@ -24,7 +24,7 @@ class MockEidmsdkPlatform
 
   @override
   Future<CertificatesInfo?> getCertificates({
-    required List<EIDCertificateIndex> types,
+    required EIDCertificateIndex type,
     String? language,
   }) {
     calls.add('getCertificates');
@@ -80,7 +80,7 @@ void main() {
     final plugin = Eidmsdk();
     await plugin.setLogLevel(logLevel: EIDLogLevel.debug);
     await plugin.showTutorial();
-    await plugin.getCertificates(types: [EIDCertificateIndex.qes]);
+    await plugin.getCertificates(type: EIDCertificateIndex.qes);
     await plugin.signData(
       certIndex: 1,
       signatureScheme: '1.2.840.113549.1.1.11',

@@ -18,7 +18,7 @@ void main() {
     'setLogLevel': () => platform.setLogLevel(logLevel: EIDLogLevel.debug),
     'showTutorial': () => platform.showTutorial(),
     'getCertificates':
-        () => platform.getCertificates(types: [EIDCertificateIndex.qes]),
+        () => platform.getCertificates(type: EIDCertificateIndex.qes),
     'signData':
         () => platform.signData(
           certIndex: 1,

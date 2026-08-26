@@ -50,7 +50,7 @@ void main() {
         'returns the certificate regardless of the requested type',
         () async {
           final result = await platform.getCertificates(
-            types: [EIDCertificateIndex.qes],
+            type: EIDCertificateIndex.qes,
           );
 
           expect(result, isNotNull);
@@ -64,7 +64,7 @@ void main() {
 
       test('canned payload round-trips through the JSON codec', () async {
         final result = await platform.getCertificates(
-          types: EIDCertificateIndex.values,
+          type: EIDCertificateIndex.qes,
         );
 
         // The real implementation receives this shape as a JSON string from

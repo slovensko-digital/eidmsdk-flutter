@@ -20,7 +20,7 @@ void main() {
 
     for (final type in EIDCertificateIndex.values) {
       expect(
-        find.text('getCertificates(types: [${type.name}])'),
+        find.text('getCertificates(type: ${type.name})'),
         findsOneWidget,
       );
     }

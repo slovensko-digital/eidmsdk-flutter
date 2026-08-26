@@ -52,10 +52,8 @@ the first call:
 EidmsdkPlatform.instance = MethodChannelEidmsdk();
 ```
 
-Because the fake replaces `MethodChannelEidmsdk` wholesale rather than sitting
-behind it, it does not reproduce the Android-only certificate-type offset:
-`getCertificates` always returns the same single certificate, regardless of the
-requested `types`.
+Because there is exactly one hardcoded identity, `getCertificates` always
+returns the same single QES certificate regardless of the requested `type`.
 
 
 ## Testing with the simulator fake

@@ -12,15 +12,6 @@ severity — read the security section first.
 
 ## iOS bugs (pre-existing, all in `ios/Classes/EidmsdkPlugin.swift`)
 
-- [ ] **`setLogLevel` crashes on `EIDLogLevel.none`.** Line 56 does
-      `eIDLogLevel(rawValue: rawLogLevel + 1)!`, but the SDK enum is 0-based
-      (`verbose = 0 … none = 5`). Every level is shifted by one, and `none` (5)
-      yields `rawValue 6` → `nil` → force-unwrap crash.
-- [ ] **`getCertificates` requests the wrong certificate.** Line 74 does
-      `eIDCertificateIndex(rawValue: type + 1)` while Dart already sends unshifted
-      indices for iOS, so `qes` → `ES`, `es` → `Encryption`, and `encryption` → `nil`,
-      silently dropped by `compactMap` (leaving an empty `types` array). Fixing this
-      belongs with the `EIDCertificateIndex` API cleanup below.
 - [ ] **Failed argument casts hang the Dart future.** The `guard`-else branches at
       lines 52, 69, 91, 96, 101 and 106 `print` and `return` without ever calling
       `result(...)`, so the awaiting `Future` never completes. They should return a
@@ -53,10 +44,6 @@ severity — read the security section first.
 
 These are the pre-existing `TODO` comments in the code, collected here for visibility:
 
-- [ ] `getCertificates` should take a single `EIDCertificateIndex` rather than a list,
-      since Android supports only one — `lib/eidmsdk_platform_interface.dart:49`.
-      Doing this is the natural point to also fix the iOS off-by-one above and remove
-      the platform-dependent offset in `lib/eidmsdk_method_channel.dart:51`.
 - [ ] `dataToSign` should be base64-encoded or a `Uint8List` rather than a `String` —
       `lib/eidmsdk_platform_interface.dart:59`.
 - [ ] `getPlatformVersion` is implemented on Android only and unused by Dart. Either

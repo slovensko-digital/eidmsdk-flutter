@@ -144,9 +144,8 @@ class Eidmsdk {
   /// Presents the native SDK's card-reading UI, so the future stays pending
   /// while the user holds their card to the phone.
   ///
-  /// [types] selects which certificates to read. **Android accepts exactly
-  /// one** and fails if given none or several; iOS accepts a list.
-  /// [language] is honoured on Android and ignored on iOS.
+  /// [type] selects which certificate to read. [language] is honoured on
+  /// Android and ignored on iOS.
   ///
   /// Returns `null` when the user cancels — but on Android only. iOS reports a
   /// cancellation as an error instead, so there it arrives as an
@@ -155,12 +154,12 @@ class Eidmsdk {
   /// Throws [CertificateNotFoundException] when the card carries no signing
   /// certificate, and [EidmsdkException] for any other native failure.
   Future<CertificatesInfo?> getCertificates({
-    required List<EIDCertificateIndex> types,
+    required EIDCertificateIndex type,
     String? language,
   }) async {
     try {
       return await (await _platform()).getCertificates(
-        types: types,
+        type: type,
         language: language,
       );
     } on PlatformException catch (e) {

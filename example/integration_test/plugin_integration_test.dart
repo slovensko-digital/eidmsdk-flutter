@@ -31,8 +31,7 @@ void main() {
     SimulatorEidmsdk.autoRespond = const FakeProceed();
     addTearDown(() => SimulatorEidmsdk.autoRespond = null);
 
-    final result =
-        await plugin.getCertificates(types: [EIDCertificateIndex.qes]);
+    final result = await plugin.getCertificates(type: EIDCertificateIndex.qes);
 
     expect(result, isNotNull);
     expect(result!.cardType, contains('SIMULATOR'));
