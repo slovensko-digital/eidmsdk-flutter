@@ -2,9 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:eidmsdk/eidmsdk.dart';
-import 'package:eidmsdk/src/simulator/fake_errors.dart';
 import 'package:eidmsdk/src/simulator/fake_identity.dart';
-import 'package:eidmsdk/src/simulator/fake_outcome.dart';
 import 'package:eidmsdk/src/simulator/fake_platform.dart';
 import 'package:eidmsdk/src/simulator/fake_ui.dart';
 import 'package:flutter_test/flutter_test.dart';

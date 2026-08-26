@@ -22,17 +22,22 @@ import 'types.dart';
 /// (Android), [Eidmsdk] substitutes this implementation automatically when it
 /// detects a simulated host. See `Eidmsdk.isUsingFake`.
 ///
-/// **This produces no real signatures and no real certificates.** Everything it
-/// returns is canned and marked as such.
+/// `getCertificates` and `signData` are interactive: each presents a screen so
+/// every branch — success, a chosen error code, cancellation — is reachable by
+/// hand. The certificate `getCertificates` returns and the signature
+/// `signData` produces are genuine RSA cryptography, and the signature
+/// verifies against the certificate — both backed by a throwaway keypair
+/// whose private key is committed to this repository. They prove nothing
+/// about who signed what and must never be trusted as evidence.
 ///
-/// What it deliberately does *not* emulate, because it replaces
-/// [MethodChannelEidmsdk] wholesale rather than sitting behind it:
+/// [PlatformException] codes are reported exactly as the native SDK reports
+/// them, including cancellation's platform asymmetry: an Android emulator
+/// completes with `null`, an iOS Simulator throws.
+///
+/// What it does *not* emulate, because it replaces [MethodChannelEidmsdk]
+/// wholesale rather than sitting behind it:
 ///
 ///  * the Android-only `+1` offset applied to [EIDCertificateIndex] values,
-///  * the native SHA-256-then-base64 pre-hashing of `dataToSign`,
-///  * real [PlatformException] codes, so [CertificateNotFoundException] never
-///    surfaces here,
-///  * Android's "user cancelled" behaviour of completing with `null`,
 ///  * the tutorial UI.
 class SimulatorEidmsdk extends EidmsdkPlatform {
   /// Verbatim from the native implementations, so a host app sees the same
@@ -102,13 +107,13 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     return switch (outcome) {
       // There is exactly one hardcoded identity, so the requested types are
       // not honoured: the QES certificate is always what comes back.
-      FakeProceed() => CertificatesInfo(
+      FakeProceed() => const CertificatesInfo(
         qscd: true,
         cardType: 'eID (SIMULATOR)',
         certificates: [
           Certificate(
             slot: 'QES',
-            supportedSchemes: const [FakeSigner.supportedSignatureScheme],
+            supportedSchemes: [FakeSigner.supportedSignatureScheme],
             isQualified: true,
             certIndex: 1,
             certData: FakeIdentity.certificateBase64,

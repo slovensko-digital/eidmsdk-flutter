@@ -17,10 +17,10 @@ class CertificatesScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
+          const Text(
             '${FakeIdentity.subjectCommonName}\n'
             '${FakeIdentity.subjectLocality}, ${FakeIdentity.subjectCountry}',
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black,
               fontSize: 18,
               fontWeight: FontWeight.bold,

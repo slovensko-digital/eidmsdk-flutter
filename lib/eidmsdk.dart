@@ -68,7 +68,8 @@ class Eidmsdk {
 
     debugPrint(
       'eidmsdk: simulator/emulator detected, using SimulatorEidmsdk. '
-      'THIS IS A FAKE - it returns canned certificates and no real signatures.',
+      'THIS IS A FAKE - its certificate and signature are real cryptography '
+      'from a committed, worthless keypair, and prove nothing.',
     );
 
     return SimulatorEidmsdk();

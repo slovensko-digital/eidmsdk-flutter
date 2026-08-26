@@ -1,6 +1,4 @@
 import 'package:eidmsdk/eidmsdk.dart';
-import 'package:eidmsdk/src/simulator/fake_errors.dart';
-import 'package:eidmsdk/src/simulator/fake_outcome.dart';
 import 'package:eidmsdk/src/simulator/fake_platform.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

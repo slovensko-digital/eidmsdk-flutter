@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:eidmsdk/eidmsdk.dart';
-import 'package:eidmsdk/src/simulator/fake_outcome.dart';
 import 'package:eidmsdk/src/simulator/fake_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
