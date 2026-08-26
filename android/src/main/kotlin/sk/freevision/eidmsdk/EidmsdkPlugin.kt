@@ -105,22 +105,21 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             return
         }
 
-        // Every method call arguments expected it to be Map<String, Any?>
+        // Every method call's arguments are expected to be Map<String, Any?>
         if (call.arguments !is Map<*, *>) {
-            // TODO use custom .error() fun with IllegalArgumentException
-            result.error(
-                /* errorCode = */ "ERROR_PARSE_ARGUMENTS",
-                /* errorMessage = */ "Error parsing arguments",
-                /* errorDetails = */ call.arguments.toString(),
-            )
+            result.errorParsingArguments(call.arguments.toString())
+
             return
         }
 
+        // Required arguments go through [requiredArgument] rather than !! so that
+        // a missing or wrongly-typed one reports a channel error the Dart side
+        // can catch, instead of throwing out of onMethodCall where nothing
+        // handles it and the awaiting Future never completes.
         when (call.method) {
-            "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
-
             "setLogLevel" -> result.setLogLevel(
-                logLevel = call.argument("logLevel")!!,
+                logLevel = call.requiredArgument<Int>("logLevel")
+                    ?: return result.errorParsingArguments("logLevel"),
             )
 
             "showTutorial" -> result.showTutorial(
@@ -128,15 +127,20 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
 
             "getCertificates" -> result.getCertificates(
-                type = call.argument("type")!!,
+                type = call.requiredArgument<Int>("type")
+                    ?: return result.errorParsingArguments("type"),
                 language = call.argument("language"),
             )
 
             "signData" -> result.signData(
-                certIndex = call.argument("certIndex")!!,
-                signatureScheme = call.argument("signatureScheme")!!,
-                dataToSign = call.argument("dataToSign")!!,
-                isBase64Encoded = call.argument("isBase64Encoded")!!,
+                certIndex = call.requiredArgument<Int>("certIndex")
+                    ?: return result.errorParsingArguments("certIndex"),
+                signatureScheme = call.requiredArgument<String>("signatureScheme")
+                    ?: return result.errorParsingArguments("signatureScheme"),
+                dataToSign = call.requiredArgument<String>("dataToSign")
+                    ?: return result.errorParsingArguments("dataToSign"),
+                isBase64Encoded = call.requiredArgument<Boolean>("isBase64Encoded")
+                    ?: return result.errorParsingArguments("isBase64Encoded"),
                 language = call.argument("language"),
             )
 
@@ -264,6 +268,26 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     companion object {
         private const val TAG: String = "EidmsdkPlugin"
+    }
+
+    /**
+     * Reads argument [name], or `null` when it is absent or not a [T].
+     *
+     * [MethodCall.argument] casts without checking, so under erasure a value of
+     * the wrong type is handed back as if it were a [T] and only fails later,
+     * as a `ClassCastException` from wherever it is finally used. Reading it as
+     * [Any] and applying `as?` makes that check happen here instead.
+     */
+    private inline fun <reified T : Any> MethodCall.requiredArgument(name: String): T? =
+        argument<Any?>(name) as? T
+
+    /** Reports an argument that is missing, null, or of the wrong type. */
+    private fun Result.errorParsingArguments(details: String) {
+        error(
+            /* errorCode = */ "ERROR_PARSE_ARGUMENTS",
+            /* errorMessage = */ "Error parsing arguments",
+            /* errorDetails = */ details,
+        )
     }
 
     /** Universal error handler for any [Throwable]. */

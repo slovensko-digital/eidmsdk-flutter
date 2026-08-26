@@ -14,6 +14,19 @@ enum EIDLogLevel {
 
 enum EIDCertificateIndex { qes, es, encryption }
 
+/// Language the native SDK presents its own UI in.
+///
+/// Honoured on Android; iOS ignores it and uses the device language.
+enum EIDLanguage {
+  slovak('sk'),
+  english('en');
+
+  const EIDLanguage(this.code);
+
+  /// The value the native SDKs expect on the wire.
+  final String code;
+}
+
 abstract class EidmsdkPlatform extends PlatformInterface {
   /// Constructs a EidmsdkPlatform.
   EidmsdkPlatform() : super(token: _token);
@@ -39,14 +52,13 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
-  // TODO Enum for language - Slovak, English with sk/en string values
-  Future showTutorial({String? language}) {
+  Future showTutorial({EIDLanguage? language}) {
     throw UnimplementedError('showTutorial() has not been implemented.');
   }
 
   Future<CertificatesInfo?> getCertificates({
     required EIDCertificateIndex type,
-    String? language,
+    EIDLanguage? language,
   }) {
     throw UnimplementedError('getCertificates() has not been implemented.');
   }
@@ -57,7 +69,7 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     // TODO dataToSign should be base64 encoded or Uint8List instead
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) {
     throw UnimplementedError('signData() has not been implemented.');
   }

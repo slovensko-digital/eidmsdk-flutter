@@ -17,6 +17,17 @@ with `type: EIDCertificateIndex.qes`.
   Dart. `eidmsdk_method_channel.dart` no longer imports `dart:io`.
 * Android returns an `ERROR_INVALID_CERTIFICATE_TYPE` error for an unknown
   certificate type rather than throwing `IndexOutOfBoundsException`.
+* **Breaking:** `language` is now an `EIDLanguage` (`slovak` / `english`) instead
+  of a free-form `String`. It crosses the wire as the `sk` / `en` code the native
+  SDKs expect. Still honoured on Android and ignored on iOS.
+* Android reports a missing or wrongly-typed argument as `ERROR_PARSE_ARGUMENTS`,
+  naming the argument, instead of throwing out of `onMethodCall` and leaving the
+  Dart future to hang forever. `MethodCall.argument` casts without checking, so
+  the wrong-type case needed a runtime check rather than a null check.
+* Removed `getPlatformVersion`, which existed only on Android and was never
+  called from Dart.
+* iOS: dropped a trailing comma in the `showTutorial` call that required
+  Swift 6.1+/Xcode 16.4+ to compile at all.
 
 # 1.2.0
 

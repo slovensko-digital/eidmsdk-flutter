@@ -16,13 +16,10 @@ severity — read the security section first.
       lines 52, 69, 91, 96, 101 and 106 `print` and `return` without ever calling
       `result(...)`, so the awaiting `Future` never completes. They should return a
       `FlutterError`.
-- [ ] Line 62 has a trailing comma in
-      `showTutorial(from:environment: .minvProd,)`, which only compiles on
-      Swift 6.1+ / Xcode 16.4+. Harmless today, but it needlessly narrows the
-      supported toolchain.
 - [ ] Line 133 uses `UIApplication.shared.windows`, deprecated since iOS 15, with a
       double force-unwrap in `findViewController()`.
-- [ ] `language` is accepted by the Dart API but ignored on iOS (Android honours it).
+- [ ] `EIDLanguage` is accepted by the Dart API but ignored on iOS, which always uses
+      the device language. Android honours it.
 
 ## Android bugs (pre-existing)
 
@@ -33,12 +30,6 @@ severity — read the security section first.
 - [ ] `showTutorial` returns `success(false)` immediately (line 180) instead of
       waiting for the tutorial to close, unlike iOS which completes after dismissal.
       The two platforms should agree.
-- [ ] `getCertificates` throws an uncaught `IllegalArgumentException` when `types`
-      does not hold exactly one element (line 184). It should return a
-      `FlutterError`, which is also what the existing `TODO` at line 110 is about.
-- [ ] `android/src/test/kotlin/sk/freevision/eidmsdk/EidmsdkPluginTest.kt` is stale:
-      it invokes `MethodCall("getPlatformVersion", null)` (line 21), and `null`
-      arguments now hit the `ERROR_PARSE_ARGUMENTS` branch.
 
 ## API cleanups
 
@@ -46,8 +37,6 @@ These are the pre-existing `TODO` comments in the code, collected here for visib
 
 - [ ] `dataToSign` should be base64-encoded or a `Uint8List` rather than a `String` —
       `lib/eidmsdk_platform_interface.dart:59`.
-- [ ] `getPlatformVersion` is implemented on Android only and unused by Dart. Either
-      expose it or drop it.
 
 ## Tooling and housekeeping
 

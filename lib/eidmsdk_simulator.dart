@@ -98,7 +98,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
   }
 
   @override
-  Future showTutorial({String? language}) async {
+  Future showTutorial({EIDLanguage? language}) async {
     await _assertSimulated();
 
     await FakeUi.presentTutorial((_) => const TutorialScreen());
@@ -109,7 +109,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
   @override
   Future<CertificatesInfo?> getCertificates({
     required EIDCertificateIndex type,
-    String? language,
+    EIDLanguage? language,
   }) async {
     await _assertSimulated();
 
@@ -156,7 +156,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) async {
     await _assertSimulated();
 

@@ -34,9 +34,9 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   }
 
   @override
-  Future showTutorial({String? language}) async {
+  Future showTutorial({EIDLanguage? language}) async {
     final arguments = {
-      "language": language,
+      "language": language?.code,
     };
 
     return await methodChannel.invokeMethod<bool>('showTutorial', arguments);
@@ -45,7 +45,7 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   @override
   Future<CertificatesInfo?> getCertificates({
     required EIDCertificateIndex type,
-    String? language,
+    EIDLanguage? language,
   }) async {
     // The wire value is this enum's own index; each native side maps it to
     // whatever its SDK expects. iOS indexes eIDCertificateIndex directly, while
@@ -54,7 +54,7 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     // rather than a platform-dependent offset computed here.
     final arguments = {
       "type": type.index,
-      "language": language,
+      "language": language?.code,
     };
     final jsonData =
         await methodChannel.invokeMethod<String>('getCertificates', arguments);
@@ -71,14 +71,14 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
       "dataToSign": dataToSign,
       "isBase64Encoded": isBase64Encoded,
-      "language": language,
+      "language": language?.code,
     };
     final signedData =
         await methodChannel.invokeMethod<String>('signData', arguments);

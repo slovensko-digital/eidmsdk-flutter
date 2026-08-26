@@ -16,7 +16,7 @@ class MockEidmsdkPlatform
   }
 
   @override
-  Future showTutorial({String? language}) {
+  Future showTutorial({EIDLanguage? language}) {
     calls.add('showTutorial');
 
     return Future.value();
@@ -25,7 +25,7 @@ class MockEidmsdkPlatform
   @override
   Future<CertificatesInfo?> getCertificates({
     required EIDCertificateIndex type,
-    String? language,
+    EIDLanguage? language,
   }) {
     calls.add('getCertificates');
 
@@ -50,7 +50,7 @@ class MockEidmsdkPlatform
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) {
     calls.add('signData');
 

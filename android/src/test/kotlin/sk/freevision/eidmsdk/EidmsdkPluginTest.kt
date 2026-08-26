@@ -3,25 +3,76 @@ package sk.freevision.eidmsdk
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import kotlin.test.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 
-/*
- * This demonstrates a simple unit test of the Kotlin portion of this plugin's implementation.
+/**
+ * Unit tests for the argument handling in [EidmsdkPlugin.onMethodCall].
  *
- * Once you have built the plugin's example app, you can run these tests from the command
- * line by running `./gradlew testDebugUnitTest` in the `example/android/` directory, or
- * you can run them directly from IDEs that support JUnit such as Android Studio.
+ * Only the paths that touch no Android framework class and need no Activity are
+ * covered here — a plain JVM unit test has stub `android.os.Build` values and no
+ * `ComponentActivity`, so the SDK-invoking branches cannot run. Those are
+ * exercised by the example app's integration tests instead.
+ *
+ * Run with `./gradlew :eidmsdk:testDebugUnitTest` from `example/android/`.
  */
-
 internal class EidmsdkPluginTest {
-  @Test
-  fun onMethodCall_getPlatformVersion_returnsExpectedValue() {
-    val plugin = EidmsdkPlugin()
+    private val plugin = EidmsdkPlugin()
 
-    val call = MethodCall("getPlatformVersion", null)
-    val mockResult: MethodChannel.Result = Mockito.mock(MethodChannel.Result::class.java)
-    plugin.onMethodCall(call, mockResult)
+    private fun call(method: String, arguments: Any?): MethodChannel.Result {
+        val result = Mockito.mock(MethodChannel.Result::class.java)
+        plugin.onMethodCall(MethodCall(method, arguments), result)
 
-    Mockito.verify(mockResult).success("Android " + android.os.Build.VERSION.RELEASE)
-  }
+        return result
+    }
+
+    @Test
+    fun `unknown method is reported as not implemented`() {
+        val result = call("noSuchMethod", emptyMap<String, Any?>())
+
+        Mockito.verify(result).notImplemented()
+    }
+
+    @Test
+    fun `non-map arguments are rejected`() {
+        val result = call("setLogLevel", "not a map")
+
+        Mockito.verify(result).error(
+            Mockito.eq("ERROR_PARSE_ARGUMENTS"),
+            anyString(),
+            Mockito.any(),
+        )
+    }
+
+    @Test
+    fun `a missing required argument reports which one, naming it in details`() {
+        // Previously these were read with !!, so a missing argument threw out of
+        // onMethodCall and the awaiting Dart Future never completed.
+        val cases = mapOf(
+            "setLogLevel" to "logLevel",
+            "getCertificates" to "type",
+            "signData" to "certIndex",
+        )
+
+        for ((method, argument) in cases) {
+            val result = call(method, emptyMap<String, Any?>())
+
+            Mockito.verify(result).error(
+                Mockito.eq("ERROR_PARSE_ARGUMENTS"),
+                anyString(),
+                Mockito.eq(argument),
+            )
+        }
+    }
+
+    @Test
+    fun `a wrongly typed required argument is rejected rather than crashing`() {
+        val result = call("getCertificates", mapOf("type" to "not an int"))
+
+        Mockito.verify(result).error(
+            Mockito.eq("ERROR_PARSE_ARGUMENTS"),
+            anyString(),
+            Mockito.eq("type"),
+        )
+    }
 }

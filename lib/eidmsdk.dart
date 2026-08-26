@@ -10,7 +10,7 @@ import 'types.dart';
 
 export 'eidmsdk_method_channel.dart' show MethodChannelEidmsdk;
 export 'eidmsdk_platform_interface.dart'
-    show EidmsdkPlatform, EIDLogLevel, EIDCertificateIndex;
+    show EidmsdkPlatform, EIDLogLevel, EIDCertificateIndex, EIDLanguage;
 export 'eidmsdk_simulator.dart' show SimulatorEidmsdk;
 export 'errors.dart';
 export 'src/simulator/fake_errors.dart' show FakeErrorCase;
@@ -136,7 +136,7 @@ class Eidmsdk {
   ///
   /// As with [setLogLevel], a native failure surfaces as a raw
   /// [PlatformException] rather than an [EidmsdkException].
-  Future showTutorial({String? language}) async =>
+  Future showTutorial({EIDLanguage? language}) async =>
       (await _platform()).showTutorial(language: language);
 
   /// Reads the signing certificates from the card.
@@ -155,7 +155,7 @@ class Eidmsdk {
   /// certificate, and [EidmsdkException] for any other native failure.
   Future<CertificatesInfo?> getCertificates({
     required EIDCertificateIndex type,
-    String? language,
+    EIDLanguage? language,
   }) async {
     try {
       return await (await _platform()).getCertificates(
@@ -193,7 +193,7 @@ class Eidmsdk {
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) async {
     try {
       return await (await _platform()).signData(

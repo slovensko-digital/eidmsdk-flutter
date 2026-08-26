@@ -78,12 +78,38 @@ void main() {
     // SDK enum, so a change here silently breaks one platform.
     for (final type in EIDCertificateIndex.values) {
       log.clear();
-      await platform.getCertificates(type: type, language: 'sk');
+      await platform.getCertificates(
+        type: type,
+        language: EIDLanguage.slovak,
+      );
 
       expect(log.single.arguments, {'type': type.index, 'language': 'sk'});
     }
 
     expect(EIDCertificateIndex.qes.index, 0);
+  });
+
+  test('language crosses the wire as its code, not its enum name', () async {
+    // The native SDKs take a language string, so the enum has to be unwrapped
+    // here rather than shipped as an index or a Dart enum name.
+    for (final language in EIDLanguage.values) {
+      log.clear();
+      await platform.getCertificates(
+        type: EIDCertificateIndex.qes,
+        language: language,
+      );
+
+      expect((log.single.arguments as Map)['language'], language.code);
+    }
+
+    expect(EIDLanguage.slovak.code, 'sk');
+    expect(EIDLanguage.english.code, 'en');
+  });
+
+  test('a null language stays null on the wire', () async {
+    await platform.getCertificates(type: EIDCertificateIndex.qes);
+
+    expect((log.single.arguments as Map)['language'], isNull);
   });
 
   test('getCertificates decodes the JSON string payload', () async {
