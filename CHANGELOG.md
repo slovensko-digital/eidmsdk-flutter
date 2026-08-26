@@ -1,3 +1,20 @@
+# 1.2.0
+
+* Simulator fake is now interactive: `showTutorial`, `getCertificates` and
+  `signData` each present a screen, with success, a chosen error, or
+  cancellation reachable on demand.
+* `signData` now returns a **real** RSA signature that verifies against the
+  certificate `getCertificates` returns, signed with a committed throwaway key.
+  It no longer throws. The signatures prove nothing and must never be trusted.
+* `getCertificates` returns a genuine self-signed certificate for
+  `CN=Jozko Mrkvicka, L=Bratislava`, replacing the placeholder. It now returns
+  one QES certificate regardless of the requested types.
+* Cancellation is platform-faithful: `null` on Android, an exception on iOS.
+* Added `SimulatorEidmsdk.autoRespond` so automated tests do not hang, and
+  `Eidmsdk.navigatorKey` as a fallback if navigator discovery fails.
+* `SimulatorEidmsdk` now refuses to run on real hardware.
+* New dependency: `pointycastle`.
+
 # 1.1.0
 
 * Support running on the iOS Simulator and the Android emulator.

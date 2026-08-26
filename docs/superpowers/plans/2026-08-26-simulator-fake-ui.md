@@ -1870,7 +1870,7 @@ class SignScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FakeScaffold(
-      title: 'Sign',
+      title: 'Sign data',
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

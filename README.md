@@ -29,12 +29,15 @@ Both are handled automatically, with no setup in the host app:
   `SimulatorEidmsdk`, a fake implementation shared by both platforms.
 
 > [!WARNING]
-> **The fake produces no real signatures and no real certificates.**
-> `getCertificates` returns a canned payload whose `certData` is the literal
-> string `FAKE-SIMULATOR-CERTIFICATE`, and `signData` throws an
-> `EidmsdkException` rather than returning a placeholder signature, so a fake
-> signature can never be mistaken for a real one. Signing with a hardcoded
-> keystore and certificate is not implemented yet.
+> **The fake produces no real certificates and no real signatures — in the
+> sense that matters: nobody signed anything.** `getCertificates` and
+> `signData` are interactive on a simulator or emulator (see
+> [Testing with the simulator fake](#testing-with-the-simulator-fake) below),
+> and the signature `signData` returns is genuine RSA cryptography that
+> verifies against the certificate `getCertificates` returns. Both are backed
+> by a throwaway keypair whose private key is committed to this repository, so
+> they prove nothing about who signed what and must never be trusted as
+> evidence.
 
 `Eidmsdk.isUsingFake()` reports whether the fake is active — the example app uses
 it to show a banner. Detection fails closed: if it cannot be completed for any
@@ -47,9 +50,73 @@ EidmsdkPlatform.instance = MethodChannelEidmsdk();
 ```
 
 Because the fake replaces `MethodChannelEidmsdk` wholesale rather than sitting
-behind it, it does not reproduce the Android-only certificate-type offset, the
-native SHA-256 pre-hashing of `dataToSign`, real `PlatformException` codes, or
-Android's "user cancelled" `null` result.
+behind it, it does not reproduce the Android-only certificate-type offset:
+`getCertificates` always returns the same single certificate, regardless of the
+requested `types`.
+
+
+## Testing with the simulator fake
+
+On a simulator or emulator, each call presents a screen so every branch is
+reachable by hand. All screens are white with black buttons and carry a
+`SIMULATOR — FAKE eID SDK` banner.
+
+| Call | Screen | Choices |
+|---|---|---|
+| `showTutorial()` | Tutorial | Close |
+| `getCertificates()` | Certificates — shows Jozko Mrkvicka, Bratislava | Return certificate · Return error · Cancel |
+| `signData()` | Sign data — shows the data, `certIndex` and scheme | Sign · Return error · Cancel |
+
+"Return error" opens a picker of 10 real eID error codes
+(`certificatesNotIssued`, `signingFailed`, `kepPinBlocked`, …). The chosen code
+is reported exactly as the native SDK reports it, so it maps to the same
+exception a real device produces — `certificatesNotIssued` becomes
+`CertificateNotFoundException`, everything else `EidmsdkException`.
+
+**Cancellation is platform-faithful**, matching the real SDK's asymmetry: on an
+Android emulator the call completes with `null`; on an iOS Simulator it throws
+`EidmsdkException`. An app that only handles one of those will fail on the other
+platform, which is precisely what this is here to catch.
+
+> [!WARNING]
+> Signatures produced here are **real cryptography from a throwaway keypair
+> whose private key is committed to this repository**. They verify against the
+> certificate `getCertificates` returns, which is what makes them useful for
+> exercising a signing pipeline — and they prove absolutely nothing about who
+> signed what. Never accept one as evidence of anything.
+
+### Keeping your own tests from hanging
+
+The screens block until someone taps. Any automated test that calls into the
+plugin must say in advance what should happen:
+
+```dart
+import 'package:eidmsdk/eidmsdk.dart';
+
+setUp(() => SimulatorEidmsdk.autoRespond = const FakeProceed());
+tearDown(() => SimulatorEidmsdk.autoRespond = null);
+```
+
+Use `FakeError(FakeErrorCase.signingFailed)` or `FakeCancel()` to drive the
+other branches. Leave it unset to exercise the screens with a `WidgetTester`.
+
+`SimulatorEidmsdk` also refuses to run at all outside a simulator or emulator,
+throwing `EidmsdkException` — it can never produce a fake signature on real
+hardware even if a host app assigns it directly.
+
+### If the fake cannot find your navigator
+
+It locates your app's root `Navigator` by itself and needs no setup. If it ever
+reports that it could not find one, hand it yours:
+
+```dart
+final navigatorKey = GlobalKey<NavigatorState>();
+
+void main() {
+  Eidmsdk.navigatorKey = navigatorKey;
+  runApp(MaterialApp(navigatorKey: navigatorKey, home: const HomePage()));
+}
+```
 
 
 ## Development

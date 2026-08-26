@@ -10,21 +10,6 @@ severity — read the security section first.
       variable. It is still reachable in history, so it must be revoked whether or
       not history is ever rewritten.
 
-## Deferred from simulator support
-
-- [ ] **Implement fake signing.** `SimulatorEidmsdk.signData`
-      (`lib/eidmsdk_simulator.dart`) currently throws instead of returning a
-      signature. It should sign with a hardcoded keystore and private certificate
-      so that signing flows can be exercised end to end without a card. Deliberately
-      throws rather than returning a placeholder, so a fake signature can never be
-      mistaken for a real one — keep that property.
-- [ ] Once signing works, replace the placeholder `certData`
-      (`FAKE-SIMULATOR-CERTIFICATE`) with the matching hardcoded certificate, so
-      callers that genuinely parse X.509 can be exercised too.
-- [ ] Consider having `SimulatorEidmsdk` reproduce the native SHA-256-then-base64
-      pre-hashing of `dataToSign`, so the fake and real signing paths agree on what
-      is actually signed.
-
 ## iOS bugs (pre-existing, all in `ios/Classes/EidmsdkPlugin.swift`)
 
 - [ ] **`setLogLevel` crashes on `EIDLogLevel.none`.** Line 56 does
