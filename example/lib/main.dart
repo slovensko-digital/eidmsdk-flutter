@@ -34,6 +34,7 @@ class HomePage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Center(
             child: Column(
+              spacing: 12,
               children: [
                 const _FakeSdkBanner(),
                 ...EIDLogLevel.values.map((e) => ElevatedButton(
@@ -63,7 +64,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton(
-                  child: const Text('signData("hello world") — opens fake UI'),
+                  child: const Text('signData("hello world")'),
                   onPressed: () => _run(
                     context,
                     () => _eidmsdkPlugin.signData(
@@ -72,12 +73,6 @@ class HomePage extends StatelessWidget {
                       dataToSign: "hello world",
                     ),
                   ),
-                ),
-                ElevatedButton(
-                  child: const Text('showResult'),
-                  onPressed: () async {
-                    showResult(context, 'hello world');
-                  },
                 ),
               ],
             ),
