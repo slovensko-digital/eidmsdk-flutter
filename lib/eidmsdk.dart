@@ -7,9 +7,9 @@ import 'eidmsdk_simulator.dart';
 import 'errors.dart';
 import 'types.dart';
 
+export 'eidmsdk_method_channel.dart' show MethodChannelEidmsdk;
 export 'eidmsdk_platform_interface.dart'
     show EidmsdkPlatform, EIDLogLevel, EIDCertificateIndex;
-export 'eidmsdk_method_channel.dart' show MethodChannelEidmsdk;
 export 'eidmsdk_simulator.dart' show SimulatorEidmsdk;
 export 'errors.dart';
 export 'types.dart';
@@ -52,8 +52,10 @@ class Eidmsdk {
       return current;
     }
 
-    debugPrint('eidmsdk: simulator/emulator detected, using SimulatorEidmsdk. '
-        'THIS IS A FAKE - it returns canned certificates and no real signatures.');
+    debugPrint(
+      'eidmsdk: simulator/emulator detected, using SimulatorEidmsdk. '
+      'THIS IS A FAKE - it returns canned certificates and no real signatures.',
+    );
 
     return SimulatorEidmsdk();
   }
@@ -76,6 +78,8 @@ class Eidmsdk {
     debugForceSimulator = null;
   }
 
+  // TODO Add missing method docs
+  // TODO Cleanup code - put await _platform() on new line each time
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async =>
       (await _platform()).setLogLevel(logLevel: logLevel);
 

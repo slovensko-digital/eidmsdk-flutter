@@ -35,12 +35,11 @@ abstract class EidmsdkPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> setLogLevel({
-    required EIDLogLevel logLevel,
-  }) {
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) {
     throw UnimplementedError('setLogLevel() has not been implemented.');
   }
 
+  // TODO Enum for language - Slovak, English with sk/en string values
   Future showTutorial({String? language}) {
     throw UnimplementedError('showTutorial() has not been implemented.');
   }
