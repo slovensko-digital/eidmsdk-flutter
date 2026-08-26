@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import 'eidmsdk_method_channel.dart';
 import 'eidmsdk_platform_interface.dart';
 import 'eidmsdk_simulator.dart';
 import 'errors.dart';
+import 'src/simulator/fake_ui.dart';
 import 'types.dart';
 
 export 'eidmsdk_method_channel.dart' show MethodChannelEidmsdk;
@@ -12,6 +13,9 @@ export 'eidmsdk_platform_interface.dart'
     show EidmsdkPlatform, EIDLogLevel, EIDCertificateIndex;
 export 'eidmsdk_simulator.dart' show SimulatorEidmsdk;
 export 'errors.dart';
+export 'src/simulator/fake_errors.dart' show FakeErrorCase;
+export 'src/simulator/fake_outcome.dart'
+    show FakeOutcome, FakeProceed, FakeError, FakeCancel;
 export 'types.dart';
 
 class Eidmsdk {
@@ -27,6 +31,16 @@ class Eidmsdk {
   /// branches be tested off-simulator.
   @visibleForTesting
   static bool? debugForceSimulator;
+
+  /// Optional escape hatch for the simulator fake's screens.
+  ///
+  /// The fake normally finds the host app's navigator by itself and needs no
+  /// setup. Assign this to your app's `navigatorKey` only if it reports that it
+  /// could not find one.
+  static GlobalKey<NavigatorState>? get navigatorKey => FakeUi.navigatorKey;
+
+  static set navigatorKey(GlobalKey<NavigatorState>? key) =>
+      FakeUi.navigatorKey = key;
 
   static Future<EidmsdkPlatform> _platform() =>
       _platformFuture ??= _resolvePlatform();

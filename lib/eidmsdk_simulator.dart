@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'eidmsdk_method_channel.dart';
 import 'eidmsdk_platform_interface.dart';
+import 'errors.dart';
 import 'src/simulator/fake_errors.dart';
 import 'src/simulator/fake_identity.dart';
 import 'src/simulator/fake_outcome.dart';
@@ -41,11 +44,45 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
   /// message it would see from a real device.
   static const String _signErrorMessage = 'Chyba pri podpisovaní.';
 
+  /// When set, the fake screens resolve to this outcome immediately and nothing
+  /// renders. Set it in tests so that calls into the plugin cannot hang waiting
+  /// for a tap that never comes.
+  static FakeOutcome? get autoRespond => FakeUi.autoRespond;
+
+  static set autoRespond(FakeOutcome? outcome) => FakeUi.autoRespond = outcome;
+
+  /// Overrides the simulator check performed by [_assertSimulated]. Tests only.
+  @visibleForTesting
+  static bool? debugAssumeSimulator;
+
+  /// Refuses to run anywhere a real card could be used.
+  ///
+  /// Auto-detection already prevents this, but a host can assign
+  /// [SimulatorEidmsdk] directly. Checking again at call time means a fake
+  /// signature cannot be produced on a device even then.
+  Future<void> _assertSimulated() async {
+    final simulated =
+        debugAssumeSimulator ?? await MethodChannelEidmsdk().isSimulator();
+    if (!simulated) {
+      throw EidmsdkException(
+        'SimulatorEidmsdk was used on real hardware. It produces fake '
+        'certificates and signatures, so it refuses to run outside a '
+        'simulator or emulator. Use MethodChannelEidmsdk instead.',
+      );
+    }
+  }
+
   @override
-  Future<bool> setLogLevel({required EIDLogLevel logLevel}) async => true;
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) async {
+    await _assertSimulated();
+
+    return true;
+  }
 
   @override
   Future showTutorial({String? language}) async {
+    await _assertSimulated();
+
     await FakeUi.presentTutorial((_) => const TutorialScreen());
 
     return null;
@@ -56,6 +93,8 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     required List<EIDCertificateIndex> types,
     String? language,
   }) async {
+    await _assertSimulated();
+
     final outcome = await FakeUi.presentOutcome(
       (_) => const CertificatesScreen(),
     );
@@ -99,6 +138,8 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     bool isBase64Encoded = false,
     String? language,
   }) async {
+    await _assertSimulated();
+
     if (signatureScheme != FakeSigner.supportedSignatureScheme) {
       throw PlatformException(
         code: FakeErrorCase.unsupportedSignatureScheme.code,

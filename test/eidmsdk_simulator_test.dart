@@ -9,6 +9,14 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final platform = SimulatorEidmsdk();
 
+  setUp(() {
+    SimulatorEidmsdk.debugAssumeSimulator = true;
+  });
+
+  tearDown(() {
+    SimulatorEidmsdk.debugAssumeSimulator = null;
+  });
+
   group('SimulatorEidmsdk', () {
     test('setLogLevel reports success', () async {
       expect(await platform.setLogLevel(logLevel: EIDLogLevel.debug), isTrue);

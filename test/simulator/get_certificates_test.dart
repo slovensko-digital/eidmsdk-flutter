@@ -14,12 +14,14 @@ void main() {
   setUp(() {
     EidmsdkPlatform.instance = platform;
     Eidmsdk.resetForTesting();
+    SimulatorEidmsdk.debugAssumeSimulator = true;
   });
 
   tearDown(() {
     FakeUi.autoRespond = null;
     FakeHostPlatform.debugIsAndroidOverride = null;
     Eidmsdk.resetForTesting();
+    SimulatorEidmsdk.debugAssumeSimulator = null;
   });
 
   test('proceeding returns the hardcoded certificate', () async {
