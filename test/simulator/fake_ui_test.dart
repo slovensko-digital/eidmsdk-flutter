@@ -85,6 +85,43 @@ void main() {
     expect(find.text('should not appear'), findsNothing);
   });
 
+  testWidgets(
+    'autoRespond short-circuits presentOutcome even with no navigator in the tree',
+    (tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text('no navigator here'),
+        ),
+      );
+      FakeUi.autoRespond = const FakeProceed();
+
+      final result = await FakeUi.presentOutcome(
+        (context) => const Placeholder(),
+      );
+
+      expect(result, isA<FakeProceed>());
+    },
+  );
+
+  testWidgets(
+    'autoRespond short-circuits presentTutorial even with no navigator in the tree',
+    (tester) async {
+      await tester.pumpWidget(
+        const Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text('no navigator here'),
+        ),
+      );
+      FakeUi.autoRespond = const FakeProceed();
+
+      await expectLater(
+        FakeUi.presentTutorial((context) => const Placeholder()),
+        completes,
+      );
+    },
+  );
+
   testWidgets('throws a helpful error when there is no navigator to use', (
     tester,
   ) async {
