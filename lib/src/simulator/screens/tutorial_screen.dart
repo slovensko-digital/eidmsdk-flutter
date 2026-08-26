@@ -20,13 +20,12 @@ class TutorialScreen extends StatelessWidget {
                 'phone for NFC reading. There is no NFC on a simulator, so this '
                 'screen only stands in for it.',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black),
               ),
             ),
           ),
-          fakeButton(
-            label: 'Close',
+          ElevatedButton(
             onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
           ),
         ],
       ),

@@ -20,13 +20,17 @@ class ErrorPickerScreen extends StatelessWidget {
               'The chosen code maps to the same exception a real device '
               'produces (exact on iOS; Android reports different code '
               'strings, but the same mapped exception types).',
-              style: TextStyle(color: Colors.black),
             ),
           ),
           for (final errorCase in FakeErrorCase.values)
-            fakeButton(
-              label: errorCase.label,
-              onPressed: () => Navigator.of(context).pop(errorCase),
+            Padding(
+              padding: const EdgeInsets.only(
+                bottom: FakeScaffold.buttonSpacing,
+              ),
+              child: ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(errorCase),
+                child: Text(errorCase.label),
+              ),
             ),
         ],
       ),

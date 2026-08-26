@@ -25,6 +25,7 @@ void main() {
                   picked = await Navigator.of(context).push<FakeErrorCase>(
                     MaterialPageRoute<FakeErrorCase>(
                       builder: (_) => const ErrorPickerScreen(),
+                      fullscreenDialog: true,
                     ),
                   );
                 },

@@ -72,7 +72,7 @@ purpose** (`tools/generate_fake_identity.sh`, needs OpenSSL 3.5+ for
 signature as evidence. `SimulatorEidmsdk` re-checks `isSimulator` at *call* time,
 not just at selection, and refuses to run on hardware.
 
-### Two design rules worth preserving
+### Three design rules worth preserving
 
 **Errors reuse the real mapping.** The fake throws genuine `PlatformException`s
 carrying the native error codes, so they travel through the same
@@ -86,6 +86,20 @@ directly, Android shifts past the extra leading `ALL` in `EIDCertificateType`.
 Keeping that per-SDK, rather than as an offset computed in Dart, is what removed
 a long-standing off-by-one. `test/eidmsdk_method_channel_test.dart` pins the wire
 contract; a change there silently breaks one platform.
+
+**The fake imposes its own `ThemeData`; it never inherits the host's.** The
+screens are pushed onto the *host app's* `Navigator`, so `Theme.of(context)`
+there returns whatever the host configured — a dark or heavily branded host would
+repaint the fake into something that looks native to that app, defeating the
+point of the banner. `FakeScaffold._fakeTheme` is therefore built from scratch,
+**not** with `Theme.of(context).copyWith(...)`, which would let every color it
+does not name explicitly leak in. Screens below it use plain `ElevatedButton` and
+unstyled `Text`. Two consequences: a new screen must go through `FakeScaffold`
+(`ErrorPickerScreen` is pushed as a separate route, a Navigator *sibling*, so it
+is covered only because it uses `FakeScaffold` itself), and the banner stays
+hardcoded black-on-white so it is never one `_fakeTheme` edit from invisible.
+`test/simulator/screens/fake_scaffold_test.dart` pins this against a
+deliberately hostile host theme.
 
 ### Platform behavior that genuinely differs
 

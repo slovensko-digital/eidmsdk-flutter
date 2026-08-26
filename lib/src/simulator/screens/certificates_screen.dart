@@ -28,6 +28,7 @@ class CertificatesScreen extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -35,41 +36,44 @@ class CertificatesScreen extends StatelessWidget {
           '${FakeIdentity.subjectCommonName}\n'
           '${FakeIdentity.subjectLocality}, '
           '${FakeIdentity.subjectCountry}',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        const Padding(
-          padding: EdgeInsets.only(top: 8),
+        Padding(
+          padding: const EdgeInsets.only(top: 8),
           child: Text(
             'One qualified signing certificate (QES). Self-signed '
             'and trusted by nobody.',
-            style: TextStyle(color: Colors.black54),
+            style: TextStyle(color: colors.onSurfaceVariant),
           ),
         ),
         const Spacer(),
-        fakeButton(
-          label: 'Return certificate',
-          onPressed: () => Navigator.of(context).pop(const FakeProceed()),
-        ),
-        fakeButton(
-          label: 'Return error',
-          onPressed: () async {
-            final picked = await Navigator.of(context).push<FakeErrorCase>(
-              MaterialPageRoute<FakeErrorCase>(
-                builder: (_) => const ErrorPickerScreen(),
-              ),
-            );
-            if (picked != null && context.mounted) {
-              Navigator.of(context).pop(FakeError(picked));
-            }
-          },
-        ),
-        fakeButton(
-          label: 'Cancel',
-          onPressed: () => Navigator.of(context).pop(const FakeCancel()),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          spacing: FakeScaffold.buttonSpacing,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(const FakeProceed()),
+              child: const Text('Return certificate'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final picked = await Navigator.of(context).push<FakeErrorCase>(
+                  MaterialPageRoute<FakeErrorCase>(
+                    builder: (_) => const ErrorPickerScreen(),
+                    fullscreenDialog: true,
+                  ),
+                );
+                if (picked != null && context.mounted) {
+                  Navigator.of(context).pop(FakeError(picked));
+                }
+              },
+              child: const Text('Return error'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(const FakeCancel()),
+              child: const Text('Cancel'),
+            ),
+          ],
         ),
       ],
     );
