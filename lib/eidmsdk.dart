@@ -18,6 +18,20 @@ export 'src/simulator/fake_outcome.dart'
     show FakeOutcome, FakeProceed, FakeError, FakeCancel;
 export 'types.dart';
 
+/// Wrapper around the Slovak eID mSDK.
+///
+/// Every method here presents the native SDK's own UI and completes only when
+/// the user is finished with it, so these futures are long-lived by nature.
+///
+/// The implementation behind them is resolved once, on first use: the real
+/// method-channel implementation on a device, or [SimulatorEidmsdk] on an iOS
+/// Simulator or Android emulator, where the SDK cannot work at all because it
+/// needs NFC and a physical card. Use [ensureInitialized] to get that decision
+/// out of the way early, and [isUsingFake] to ask which one you got.
+///
+/// A number of behaviours genuinely differ between Android and iOS, because the
+/// two native SDKs do. Those differences are called out per method — the
+/// cancellation ones in particular are easy to get wrong on one platform only.
 class Eidmsdk {
   /// Memoised platform resolution.
   ///
@@ -87,20 +101,59 @@ class Eidmsdk {
   static Future<bool> isUsingFake() async =>
       await _platform() is SimulatorEidmsdk;
 
+  /// Clears the memoised platform and the [debugForceSimulator] override, so
+  /// the next call resolves from scratch.
   @visibleForTesting
   static void resetForTesting() {
     _platformFuture = null;
     debugForceSimulator = null;
   }
 
-  // TODO Add missing method docs
   // TODO Cleanup code - put await _platform() on new line each time
+
+  /// Sets the native SDK's log verbosity.
+  ///
+  /// Returns whether the level was actually applied, which is `false` on
+  /// Android: its SDK exposes no log-level control, so the call is a logged
+  /// no-op there. Returns `true` on iOS, and on a simulator, where the fake
+  /// accepts any level.
+  ///
+  /// Unlike [getCertificates] and [signData], a native failure here is not
+  /// translated — it surfaces as a raw [PlatformException].
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async =>
       (await _platform()).setLogLevel(logLevel: logLevel);
 
+  /// Presents the native SDK's tutorial on how to hold the card against the
+  /// phone for NFC reading.
+  ///
+  /// Completes when the tutorial is dismissed on iOS, but **immediately** on
+  /// Android, which launches the tutorial activity without waiting for it. Do
+  /// not treat the returned future as "the user has finished reading".
+  ///
+  /// [language] is honoured on Android and ignored on iOS.
+  ///
+  /// On a simulator a placeholder screen stands in for the real tutorial.
+  ///
+  /// As with [setLogLevel], a native failure surfaces as a raw
+  /// [PlatformException] rather than an [EidmsdkException].
   Future showTutorial({String? language}) async =>
       (await _platform()).showTutorial(language: language);
 
+  /// Reads the signing certificates from the card.
+  ///
+  /// Presents the native SDK's card-reading UI, so the future stays pending
+  /// while the user holds their card to the phone.
+  ///
+  /// [types] selects which certificates to read. **Android accepts exactly
+  /// one** and fails if given none or several; iOS accepts a list.
+  /// [language] is honoured on Android and ignored on iOS.
+  ///
+  /// Returns `null` when the user cancels — but on Android only. iOS reports a
+  /// cancellation as an error instead, so there it arrives as an
+  /// [EidmsdkException]. Handle both if you ship on both platforms.
+  ///
+  /// Throws [CertificateNotFoundException] when the card carries no signing
+  /// certificate, and [EidmsdkException] for any other native failure.
   Future<CertificatesInfo?> getCertificates({
     required List<EIDCertificateIndex> types,
     String? language,
@@ -115,6 +168,27 @@ class Eidmsdk {
     }
   }
 
+  /// Signs [dataToSign] with the certificate at [certIndex].
+  ///
+  /// Presents the native SDK's PIN-and-sign UI, so the future stays pending
+  /// while the user enters their KEP PIN and holds their card to the phone.
+  ///
+  /// The data is **hashed before it reaches the SDK**: both platforms compute
+  /// SHA-256 over it and pass that digest on, so the signature is over the
+  /// digest rather than over your bytes directly.
+  ///
+  /// [certIndex] comes from [Certificate.certIndex] in a [getCertificates]
+  /// result. [signatureScheme] is an OID string — `1.2.840.113549.1.1.11` is
+  /// sha256WithRSAEncryption. Set [isBase64Encoded] when [dataToSign] is
+  /// base64 rather than plain text. [language] is honoured on Android and
+  /// ignored on iOS.
+  ///
+  /// Returns the signature as base64, or `null` when the user cancels — on
+  /// Android only, as with [getCertificates]; on iOS a cancellation arrives as
+  /// an [EidmsdkException].
+  ///
+  /// Throws [EidmsdkException] for native failures, including an invalid,
+  /// suspended or blocked KEP PIN.
   Future<String?> signData({
     required int certIndex,
     required String signatureScheme,
@@ -135,6 +209,15 @@ class Eidmsdk {
     }
   }
 
+  /// Translates a native [PlatformException] into this package's exception
+  /// types.
+  ///
+  /// The SDKs report a missing signing certificate under different codes —
+  /// `CertificateNotFoundException` on Android, `certificatesNotIssued` on iOS
+  /// — and both map to [CertificateNotFoundException]. Everything else becomes
+  /// an [EidmsdkException].
+  ///
+  /// Never returns: it always throws.
   static Never decodeNativeError(PlatformException e) {
     switch (e.code) {
       case "CertificateNotFoundException":
