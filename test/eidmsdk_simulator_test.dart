@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:eidmsdk/eidmsdk.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -11,8 +12,16 @@ void main() {
       expect(await platform.setLogLevel(logLevel: EIDLogLevel.debug), isTrue);
     });
 
-    test('showTutorial completes without throwing', () async {
-      expect(await platform.showTutorial(), isNull);
+    testWidgets('showTutorial completes without throwing', (tester) async {
+      await tester.pumpWidget(const MaterialApp(home: Scaffold()));
+
+      final result = platform.showTutorial();
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      expect(await result, isNull);
     });
 
     test('getCertificates returns a certificate for the requested type',

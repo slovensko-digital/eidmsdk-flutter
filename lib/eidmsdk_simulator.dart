@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 
 import 'eidmsdk_platform_interface.dart';
 import 'errors.dart';
+import 'src/simulator/fake_ui.dart';
+import 'src/simulator/screens/tutorial_screen.dart';
 import 'types.dart';
 
 /// A fake [EidmsdkPlatform] for the iOS Simulator and the Android emulator.
@@ -33,29 +35,28 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
   /// Obviously-not-a-certificate placeholder. It is valid base64 so that callers
   /// which merely decode it still work, but anything that genuinely parses X.509
   /// will fail loudly rather than quietly trust fake material.
-  static final String _fakeCertData =
-      base64Encode(utf8.encode('FAKE-SIMULATOR-CERTIFICATE'));
+  static final String _fakeCertData = base64Encode(
+    utf8.encode('FAKE-SIMULATOR-CERTIFICATE'),
+  );
 
   static Certificate _certificate(EIDCertificateIndex type) => Certificate(
-        slot: switch (type) {
-          EIDCertificateIndex.qes => 'QES',
-          EIDCertificateIndex.es => 'ES',
-          EIDCertificateIndex.encryption => 'Encryption',
-        },
-        supportedSchemes: const ['1.2.840.113549.1.1.11'],
-        isQualified: type == EIDCertificateIndex.qes,
-        certIndex: type.index + 1,
-        certData: _fakeCertData,
-      );
+    slot: switch (type) {
+      EIDCertificateIndex.qes => 'QES',
+      EIDCertificateIndex.es => 'ES',
+      EIDCertificateIndex.encryption => 'Encryption',
+    },
+    supportedSchemes: const ['1.2.840.113549.1.1.11'],
+    isQualified: type == EIDCertificateIndex.qes,
+    certIndex: type.index + 1,
+    certData: _fakeCertData,
+  );
 
   @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async => true;
 
   @override
   Future showTutorial({String? language}) async {
-    // There is no BuildContext here, and presenting a stand-in tutorial would
-    // misrepresent what the real SDK shows, so this is a no-op.
-    debugPrint('eidmsdk: showTutorial() is not available on a simulator.');
+    await FakeUi.presentTutorial((_) => const TutorialScreen());
 
     return null;
   }
@@ -70,8 +71,10 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     if (types.length > 1) {
       // Android's native implementation requires exactly one type. Warn rather
       // than throw: a simulator should not be where that constraint is first met.
-      debugPrint('eidmsdk: getCertificates() was called with ${types.length} '
-          'types. Android supports only one, so this would fail on a device.');
+      debugPrint(
+        'eidmsdk: getCertificates() was called with ${types.length} '
+        'types. Android supports only one, so this would fail on a device.',
+      );
     }
 
     return CertificatesInfo(
