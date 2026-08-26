@@ -1,10 +1,10 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:eidmsdk/eidmsdk.dart';
 import 'package:eidmsdk/src/simulator/fake_identity.dart';
 import 'package:eidmsdk/src/simulator/fake_platform.dart';
 import 'package:eidmsdk/src/simulator/fake_ui.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pointycastle/export.dart';
 
@@ -79,6 +79,43 @@ void main() {
         certIndex: 1,
         signatureScheme: '1.2.840.113549.1.1.5',
         dataToSign: 'hello world',
+      ),
+      throwsA(isA<EidmsdkException>()),
+    );
+  });
+
+  test('malformed base64 surfaces as the exception a device would raise, not '
+      'a raw FormatException', () async {
+    FakeUi.autoRespond = const FakeProceed();
+
+    // Not valid base64, so decoding it throws a FormatException. That must
+    // be caught and reported through the same PlatformException channel as
+    // every other fake failure, rather than escaping raw and bypassing
+    // Eidmsdk.decodeNativeError.
+    await expectLater(
+      platform.signData(
+        certIndex: 1,
+        signatureScheme: _scheme,
+        dataToSign: 'not valid base64!!!',
+        isBase64Encoded: true,
+      ),
+      throwsA(
+        isA<PlatformException>().having(
+          (e) => e.code,
+          'code',
+          FakeErrorCase.signingFailed.code,
+        ),
+      ),
+    );
+
+    // Routed through Eidmsdk's real mapping, it becomes EidmsdkException —
+    // the same as any other unmapped code.
+    await expectLater(
+      Eidmsdk().signData(
+        certIndex: 1,
+        signatureScheme: _scheme,
+        dataToSign: 'not valid base64!!!',
+        isBase64Encoded: true,
       ),
       throwsA(isA<EidmsdkException>()),
     );

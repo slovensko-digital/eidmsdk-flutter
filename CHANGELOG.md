@@ -7,8 +7,8 @@
   certificate `getCertificates` returns, signed with a committed throwaway key.
   It no longer throws. The signatures prove nothing and must never be trusted.
 * `getCertificates` returns a genuine self-signed certificate for
-  `CN=Jozko Mrkvicka, L=Bratislava`, replacing the placeholder. It now returns
-  one QES certificate regardless of the requested types.
+  `CN=Jozko Mrkvicka, L=Bratislava, C=SK`, replacing the placeholder. It now
+  returns one QES certificate regardless of the requested types.
 * Cancellation is platform-faithful: `null` on Android, an exception on iOS.
 * Added `SimulatorEidmsdk.autoRespond` so automated tests do not hang, and
   `Eidmsdk.navigatorKey` as a fallback if navigator discovery fails.

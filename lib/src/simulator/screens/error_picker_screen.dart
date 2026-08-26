@@ -17,9 +17,9 @@ class ErrorPickerScreen extends StatelessWidget {
           const Padding(
             padding: EdgeInsets.only(bottom: 12),
             child: Text(
-              'The chosen code is reported exactly as the native SDK would '
-              'report it, so it maps to the same exception a real device '
-              'produces.',
+              'The chosen code maps to the same exception a real device '
+              'produces (exact on iOS; Android reports different code '
+              'strings, but the same mapped exception types).',
               style: TextStyle(color: Colors.black),
             ),
           ),

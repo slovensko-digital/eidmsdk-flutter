@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:eidmsdk/eidmsdk.dart';
-import 'package:eidmsdk/src/simulator/fake_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,21 +33,17 @@ void main() {
     });
 
     group('getCertificates', () {
-      // getCertificates now presents an interactive fake screen (Task 7), so
-      // these tests, which call the fake without any UI, short-circuit
-      // straight to success. This uses the internal FakeUi API rather than
-      // the not-yet-public SimulatorEidmsdk.autoRespond, which Task 9 adds;
-      // Task 10 is expected to rework this file onto that public surface
-      // once it exists. The two tests this rewrite made false — that the
-      // requested types are honoured, and that certData is an obvious
-      // placeholder — are gone; test/simulator/get_certificates_test.dart
-      // covers the real behaviour.
+      // getCertificates presents an interactive fake screen, so these tests,
+      // which call the fake without any UI, short-circuit straight to
+      // success. The two tests this made false — that the requested types
+      // are honoured, and that certData is an obvious placeholder — are gone;
+      // test/simulator/get_certificates_test.dart covers the real behaviour.
       setUp(() {
-        FakeUi.autoRespond = const FakeProceed();
+        SimulatorEidmsdk.autoRespond = const FakeProceed();
       });
 
       tearDown(() {
-        FakeUi.autoRespond = null;
+        SimulatorEidmsdk.autoRespond = null;
       });
 
       test(
@@ -89,20 +84,16 @@ void main() {
     });
 
     group('signData', () {
-      // signData now presents an interactive fake screen and produces a real
-      // signature (Task 8), so it no longer throws "not implemented". This
-      // uses the internal FakeUi API rather than the not-yet-public
-      // SimulatorEidmsdk.autoRespond, which Task 9 adds; Task 10 is expected
-      // to rework this file onto that public surface once it exists. The
-      // full behaviour -- including that the signature actually verifies
-      // against the certificate -- is covered by
+      // signData presents an interactive fake screen and produces a real
+      // signature. The full behaviour -- including that the signature
+      // actually verifies against the certificate -- is covered by
       // test/simulator/sign_data_test.dart.
       setUp(() {
-        FakeUi.autoRespond = const FakeProceed();
+        SimulatorEidmsdk.autoRespond = const FakeProceed();
       });
 
       tearDown(() {
-        FakeUi.autoRespond = null;
+        SimulatorEidmsdk.autoRespond = null;
       });
 
       test('returns a non-null signature', () async {

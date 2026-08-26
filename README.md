@@ -29,20 +29,23 @@ Both are handled automatically, with no setup in the host app:
   `SimulatorEidmsdk`, a fake implementation shared by both platforms.
 
 > [!WARNING]
-> **The fake produces no real certificates and no real signatures — in the
-> sense that matters: nobody signed anything.** `getCertificates` and
-> `signData` are interactive on a simulator or emulator (see
+> **The certificate `getCertificates` returns and the signature `signData`
+> produces are genuine RSA cryptography — and prove nothing about who signed
+> what.** `getCertificates` and `signData` are interactive on a simulator or
+> emulator (see
 > [Testing with the simulator fake](#testing-with-the-simulator-fake) below),
-> and the signature `signData` returns is genuine RSA cryptography that
-> verifies against the certificate `getCertificates` returns. Both are backed
-> by a throwaway keypair whose private key is committed to this repository, so
-> they prove nothing about who signed what and must never be trusted as
-> evidence.
+> and the signature verifies against the certificate. Both are backed by a
+> throwaway keypair whose private key is committed to this repository, so in
+> the sense that matters — nobody signed anything — they must never be
+> trusted as evidence.
 
 `Eidmsdk.isUsingFake()` reports whether the fake is active — the example app uses
-it to show a banner. Detection fails closed: if it cannot be completed for any
-reason the real implementation is kept, so the fake can never stand in on real
-hardware. To opt out explicitly, assign the real implementation yourself before
+it to show a banner. iOS detection is compile-time and therefore exact — the
+plugin is built against a stub Simulator slice that never links the real SDK.
+Android detection is a heuristic, tuned to avoid false positives that would run
+the fake on real hardware; detection also fails closed generally, so if it
+cannot be completed for any reason the real implementation is kept. To opt out
+explicitly, assign the real implementation yourself before
 the first call:
 
 ```dart
@@ -66,12 +69,22 @@ reachable by hand. All screens are white with black buttons and carry a
 | `showTutorial()` | Tutorial | Close |
 | `getCertificates()` | Certificates — shows Jozko Mrkvicka, Bratislava | Return certificate · Return error · Cancel |
 | `signData()` | Sign data — shows the data, `certIndex` and scheme | Sign · Return error · Cancel |
+| — | Error picker, opened from "Return error" above | one of 10 real eID error codes |
 
 "Return error" opens a picker of 10 real eID error codes
 (`certificatesNotIssued`, `signingFailed`, `kepPinBlocked`, …). The chosen code
-is reported exactly as the native SDK reports it, so it maps to the same
-exception a real device produces — `certificatesNotIssued` becomes
-`CertificateNotFoundException`, everything else `EidmsdkException`.
+is reported using the iOS `eIDError` vocabulary on both platforms, so it maps
+to the same exception a real device produces through `Eidmsdk`'s error mapping
+— `certificatesNotIssued` becomes `CertificateNotFoundException`, everything
+else `EidmsdkException`. This is exact for iOS; a real Android device reports
+Java exception class names instead (e.g. `CertificateNotFoundException` as a
+class name rather than an `eIDError` case), so a host that inspects
+`PlatformException.code` directly, rather than catching the exception types
+`Eidmsdk` maps to, will see iOS-shaped codes on an Android emulator.
+
+`signData` only supports one signature scheme,
+`1.2.840.113549.1.1.11` (sha256WithRSAEncryption). Any other value throws the
+real `unsupportedSignatureScheme` error.
 
 **Cancellation is platform-faithful**, matching the real SDK's asymmetry: on an
 Android emulator the call completes with `null`; on an iOS Simulator it throws
@@ -99,10 +112,18 @@ tearDown(() => SimulatorEidmsdk.autoRespond = null);
 
 Use `FakeError(FakeErrorCase.signingFailed)` or `FakeCancel()` to drive the
 other branches. Leave it unset to exercise the screens with a `WidgetTester`.
+`autoRespond` is ignored in release builds, so a release app always presents
+the labelled screen — this is what keeps the fake from producing a silent,
+unmarked signature if it were ever left set outside a test.
 
 `SimulatorEidmsdk` also refuses to run at all outside a simulator or emulator,
-throwing `EidmsdkException` — it can never produce a fake signature on real
-hardware even if a host app assigns it directly.
+throwing `EidmsdkException`. This is a call-time guard, checked again every time
+a method runs rather than only when the platform is selected, so it closes the
+case where a host assigns `SimulatorEidmsdk` directly, bypassing auto-detection.
+It is what stands between an Android false positive and a genuine signature
+produced silently: before the interactive fake and real signing existed, a
+false positive cost a placeholder and a throw; now it would cost a verifying
+signature, which is why this guard exists.
 
 ### If the fake cannot find your navigator
 

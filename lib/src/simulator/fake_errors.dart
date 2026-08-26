@@ -1,8 +1,17 @@
 /// Real eID error codes the simulator can raise on demand.
 ///
-/// The codes are exactly those the native SDKs report, so the fake's errors
-/// travel through the same `Eidmsdk.decodeNativeError` mapping as errors from a
-/// real card. The labels are what the error-picker screen displays.
+/// These are the iOS `eIDError` vocabulary (`EidmsdkPlugin.swift` sends
+/// `String(describing: error)`, i.e. the enum case name) and are used on both
+/// platforms. They are exact for iOS. A real Android device does not report
+/// this vocabulary: `EidmsdkPlugin.kt` sends `e.javaClass.simpleName`, a Java
+/// exception class name such as `CertificateNotFoundException`, not an
+/// `eIDError` case. So a host that inspects `PlatformException.code` directly
+/// — rather than catching the mapped exception types via
+/// `Eidmsdk.decodeNativeError` — will see iOS-shaped codes on an emulator that
+/// a real Android device would never produce. Going through
+/// `Eidmsdk.decodeNativeError`, as this catalogue's codes do, still lands on
+/// the same exception types either way. The labels are what the error-picker
+/// screen displays.
 enum FakeErrorCase {
   certificatesNotIssued('certificatesNotIssued', 'Certificates not issued'),
   cancelledByUser('cancelledByUser', 'Cancelled by user'),

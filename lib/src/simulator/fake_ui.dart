@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../errors.dart';
@@ -22,7 +23,21 @@ class FakeUi {
   /// Exists so that host-app integration tests calling into the plugin do not
   /// hang waiting for a tap that never comes. Exposed publicly as
   /// `SimulatorEidmsdk.autoRespond`.
-  static FakeOutcome? autoRespond;
+  ///
+  /// Ignored in release builds ([kReleaseMode]): it is unconditioned public
+  /// mutable state that suppresses every fake screen, including the
+  /// `SIMULATOR — FAKE eID SDK` banner that is otherwise the only visible
+  /// marker that a signature came from the fake and not a card. If a host set
+  /// it outside a test — a shared bootstrap, a dev flag compiled into a
+  /// release build — and that release ran on an Android device that tripped
+  /// the emulator-detection heuristic, the result would be a genuine
+  /// verifying signature produced with no screen and no marker at all.
+  /// Integration tests run in debug mode, so this does not affect them.
+  static FakeOutcome? get autoRespond => kReleaseMode ? null : _autoRespond;
+
+  static set autoRespond(FakeOutcome? outcome) => _autoRespond = outcome;
+
+  static FakeOutcome? _autoRespond;
 
   /// Optional escape hatch, exposed publicly as `Eidmsdk.navigatorKey`. Only
   /// consulted when walking the element tree finds nothing.

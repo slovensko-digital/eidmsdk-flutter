@@ -35,6 +35,10 @@ void main() {
         FakeErrorCase.nfcNotSupported: 'nfcNotSupported',
       };
 
+      // Guards against a new FakeErrorCase being added without a matching
+      // entry above, which would otherwise go silently unchecked.
+      expect(expectedCodes.length, FakeErrorCase.values.length);
+
       for (final MapEntry(key: c, value: expected) in expectedCodes.entries) {
         expect(c.code, expected, reason: 'code for ${c.name}');
       }

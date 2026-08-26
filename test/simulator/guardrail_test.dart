@@ -12,38 +12,52 @@ void main() {
     SimulatorEidmsdk.debugAssumeSimulator = null;
   });
 
-  test('refuses to run on real hardware', () async {
+  // Every method starts by calling _assertSimulated, so the guard must hold
+  // for all four, not only signData.
+  final calls = <String, Future<Object?> Function()>{
+    'setLogLevel': () => platform.setLogLevel(logLevel: EIDLogLevel.debug),
+    'showTutorial': () => platform.showTutorial(),
+    'getCertificates':
+        () => platform.getCertificates(types: [EIDCertificateIndex.qes]),
+    'signData':
+        () => platform.signData(
+          certIndex: 1,
+          signatureScheme: '1.2.840.113549.1.1.11',
+          dataToSign: 'hello world',
+        ),
+  };
+
+  test('refuses to run on real hardware for every method', () async {
     SimulatorEidmsdk.debugAssumeSimulator = false;
     SimulatorEidmsdk.autoRespond = const FakeProceed();
 
-    await expectLater(
-      platform.signData(
-        certIndex: 1,
-        signatureScheme: '1.2.840.113549.1.1.11',
-        dataToSign: 'hello world',
-      ),
-      throwsA(
-        isA<EidmsdkException>().having(
-          (e) => e.message,
-          'message',
-          contains('real hardware'),
+    for (final MapEntry(key: name, value: call) in calls.entries) {
+      await expectLater(
+        call(),
+        throwsA(
+          isA<EidmsdkException>().having(
+            (e) => e.message,
+            'message',
+            contains('real hardware'),
+          ),
         ),
-      ),
-    );
+        reason: name,
+      );
+    }
   });
 
-  test('runs when the host is simulated', () async {
+  test('runs every method when the host is simulated', () async {
     SimulatorEidmsdk.debugAssumeSimulator = true;
     SimulatorEidmsdk.autoRespond = const FakeProceed();
 
-    expect(
-      await platform.signData(
-        certIndex: 1,
-        signatureScheme: '1.2.840.113549.1.1.11',
-        dataToSign: 'hello world',
-      ),
-      isNotNull,
-    );
+    for (final MapEntry(key: name, value: call) in calls.entries) {
+      // showTutorial legitimately resolves to null; the others must not.
+      if (name == 'showTutorial') {
+        await expectLater(call(), completes, reason: name);
+      } else {
+        expect(await call(), isNotNull, reason: name);
+      }
+    }
   });
 
   test('autoRespond forwards to the presentation layer', () {

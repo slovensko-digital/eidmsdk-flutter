@@ -24,7 +24,8 @@ openssl req -x509 -newkey rsa:2048 \
   -nodes -sha256 \
   -subj "/C=SK/L=Bratislava/CN=Jozko Mrkvicka" \
   -addext "keyUsage=critical,digitalSignature,nonRepudiation" \
-  -not_before 20200101000000Z -not_after 20400101000000Z 2>/dev/null
+  -addext "basicConstraints=critical,CA:FALSE" \
+  -not_before 20200101000000Z -not_after 20400101000000Z
 
 openssl x509 -in "$TMP/cert.pem" -outform DER -out "$TMP/cert.der"
 

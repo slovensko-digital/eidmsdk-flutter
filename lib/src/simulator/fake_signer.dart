@@ -12,6 +12,28 @@ import 'fake_identity.dart';
 /// the certificate that `getCertificates` returns, so a host app can build a
 /// real signature container from it — while the key itself is public and
 /// trusted by nobody.
+///
+/// ### Whether this actually matches what the native SDK does
+///
+/// This fake computes `RSA_PKCS1v15(DigestInfo(SHA256(data)))` — it hashes the
+/// caller's data itself and signs that digest. The native plugins do not: both
+/// Swift and Kotlin compute `base64(SHA256(data))` themselves and pass that
+/// *string* to the vendor SDK as `dataToSign`, letting the SDK do the signing.
+/// The two agree only if the SDK's signing call treats the string it receives
+/// as an already-computed digest and wraps it in the PKCS#1 DigestInfo
+/// structure itself, rather than hashing it again. That is the obviously
+/// intended contract — a signing API would not otherwise ask a caller to
+/// pre-hash — but it is unverified against the real vendor SDK or hardware;
+/// nothing in this repository exercises the native signing call to confirm it.
+///
+/// What *has* been checked is the fake's own crypto against a
+/// hardware-independent oracle: `FakeSigner.signBase64(utf8("hello world"))`
+/// was confirmed byte-identical to the output of `openssl dgst -sha256 -sign`
+/// against the same private key, and `openssl dgst -sha256 -verify` against
+/// the public key extracted from [FakeIdentity]'s certificate returns
+/// `Verified OK` for that signature. That confirms this file's PKCS#1 v1.5 /
+/// SHA-256 construction is correct; it says nothing about whether the vendor
+/// SDK's `dataToSign` contract matches the assumption above.
 class FakeSigner {
   FakeSigner._();
 

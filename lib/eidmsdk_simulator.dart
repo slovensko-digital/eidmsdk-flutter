@@ -30,15 +30,19 @@ import 'types.dart';
 /// whose private key is committed to this repository. They prove nothing
 /// about who signed what and must never be trusted as evidence.
 ///
-/// [PlatformException] codes are reported exactly as the native SDK reports
-/// them, including cancellation's platform asymmetry: an Android emulator
-/// completes with `null`, an iOS Simulator throws.
+/// [PlatformException] codes are reported using the iOS `eIDError` vocabulary
+/// on both platforms, including cancellation's platform asymmetry: an Android
+/// emulator completes with `null`, an iOS Simulator throws. This is exact on
+/// iOS; a real Android device reports Throwable class names instead (see
+/// [FakeErrorCase]), so a host that inspects `PlatformException.code` directly
+/// will see iOS-shaped codes on an emulator.
 ///
 /// What it does *not* emulate, because it replaces [MethodChannelEidmsdk]
 /// wholesale rather than sitting behind it:
 ///
 ///  * the Android-only `+1` offset applied to [EIDCertificateIndex] values,
-///  * the tutorial UI.
+///  * the *real* tutorial UI — `showTutorial` presents a screen, but a fake
+///    placeholder rather than the native SDK's actual tutorial content.
 class SimulatorEidmsdk extends EidmsdkPlatform {
   /// Verbatim from the native implementations, so a host app sees the same
   /// message it would see from a real device.
@@ -62,9 +66,18 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
 
   /// Refuses to run anywhere a real card could be used.
   ///
-  /// Auto-detection already prevents this, but a host can assign
-  /// [SimulatorEidmsdk] directly. Checking again at call time means a fake
-  /// signature cannot be produced on a device even then.
+  /// Auto-detection already prevents this in the common case — exactly on
+  /// iOS, since detection there is compile-time, and heuristically on
+  /// Android, tuned to avoid false positives that would run the fake on real
+  /// hardware. But a host can assign [SimulatorEidmsdk] directly, bypassing
+  /// auto-detection entirely; [debugAssumeSimulator] is `@visibleForTesting`,
+  /// an analyzer hint rather than an enforced guard, and does not stop that.
+  /// Checking again here, at call time, closes that direct-assignment case:
+  /// it is what stands between a false positive on Android and a genuine
+  /// verifying signature produced silently on a real device. Before the
+  /// interactive fake and real signing existed, a false positive cost a
+  /// placeholder and a throw; now it costs a verifying signature, which is
+  /// why this check exists.
   Future<void> _assertSimulated() async {
     final simulated =
         debugAssumeSimulator ?? await MethodChannelEidmsdk().isSimulator();
@@ -124,6 +137,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
         throw PlatformException(
           code: error.code,
           message: _certificatesErrorMessage,
+          details: error.label,
         ),
       FakeCancel() =>
         FakeHostPlatform.isAndroid
@@ -131,6 +145,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
             : throw PlatformException(
               code: FakeErrorCase.cancelledByUser.code,
               message: _certificatesErrorMessage,
+              details: FakeErrorCase.cancelledByUser.label,
             ),
     };
   }
@@ -149,13 +164,26 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
       throw PlatformException(
         code: FakeErrorCase.unsupportedSignatureScheme.code,
         message: _signErrorMessage,
+        details: FakeErrorCase.unsupportedSignatureScheme.label,
       );
     }
 
-    final data = FakeSigner.decodeDataToSign(
-      dataToSign,
-      isBase64Encoded: isBase64Encoded,
-    );
+    final Uint8List data;
+    try {
+      data = FakeSigner.decodeDataToSign(
+        dataToSign,
+        isBase64Encoded: isBase64Encoded,
+      );
+    } on FormatException {
+      // Malformed base64 must reach a host the same way any other signing
+      // failure does, not as a raw Dart exception that bypasses
+      // Eidmsdk.decodeNativeError.
+      throw PlatformException(
+        code: FakeErrorCase.signingFailed.code,
+        message: _signErrorMessage,
+        details: FakeErrorCase.signingFailed.label,
+      );
+    }
 
     final outcome = await FakeUi.presentOutcome(
       (_) => SignScreen(
@@ -168,13 +196,18 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     return switch (outcome) {
       FakeProceed() => FakeSigner.signBase64(data),
       FakeError(error: final error) =>
-        throw PlatformException(code: error.code, message: _signErrorMessage),
+        throw PlatformException(
+          code: error.code,
+          message: _signErrorMessage,
+          details: error.label,
+        ),
       FakeCancel() =>
         FakeHostPlatform.isAndroid
             ? null
             : throw PlatformException(
               code: FakeErrorCase.cancelledByUser.code,
               message: _signErrorMessage,
+              details: FakeErrorCase.cancelledByUser.label,
             ),
     };
   }
