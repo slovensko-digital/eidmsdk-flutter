@@ -18,8 +18,10 @@ void main() {
       expect(FakeIdentity.certificateDer.length, greaterThan(500));
       // DER SEQUENCE tag.
       expect(FakeIdentity.certificateDer.first, 0x30);
-      expect(base64Encode(FakeIdentity.certificateDer),
-          FakeIdentity.certificateBase64);
+      expect(
+        base64Encode(FakeIdentity.certificateDer),
+        FakeIdentity.certificateBase64,
+      );
     });
 
     test('certificate and private key are a matched pair', () {

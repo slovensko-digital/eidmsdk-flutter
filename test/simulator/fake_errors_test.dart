@@ -47,34 +47,40 @@ void main() {
       // the fake cannot drift from it.
       expect(
         () => Eidmsdk.decodeNativeError(
-            PlatformException(code: FakeErrorCase.certificatesNotIssued.code)),
+          PlatformException(code: FakeErrorCase.certificatesNotIssued.code),
+        ),
         throwsA(isA<CertificateNotFoundException>()),
       );
     });
 
-    test('other cases map to EidmsdkException, not CertificateNotFoundException',
-        () {
-      for (final c in FakeErrorCase.values
-          .where((c) => c != FakeErrorCase.certificatesNotIssued)) {
-        expect(
-          () => Eidmsdk.decodeNativeError(PlatformException(code: c.code)),
-          throwsA(allOf(
-            isA<EidmsdkException>(),
-            isNot(isA<CertificateNotFoundException>()),
-          )),
-          reason: c.name,
-        );
-      }
-    });
+    test(
+      'other cases map to EidmsdkException, not CertificateNotFoundException',
+      () {
+        for (final c in FakeErrorCase.values.where(
+          (c) => c != FakeErrorCase.certificatesNotIssued,
+        )) {
+          expect(
+            () => Eidmsdk.decodeNativeError(PlatformException(code: c.code)),
+            throwsA(
+              allOf(
+                isA<EidmsdkException>(),
+                isNot(isA<CertificateNotFoundException>()),
+              ),
+            ),
+            reason: c.name,
+          );
+        }
+      },
+    );
   });
 
   group('FakeOutcome', () {
     test('is exhaustively switchable', () {
       String describe(FakeOutcome outcome) => switch (outcome) {
-            FakeProceed() => 'proceed',
-            FakeError(error: final e) => 'error:${e.code}',
-            FakeCancel() => 'cancel',
-          };
+        FakeProceed() => 'proceed',
+        FakeError(error: final e) => 'error:${e.code}',
+        FakeCancel() => 'cancel',
+      };
 
       expect(describe(const FakeProceed()), 'proceed');
       expect(describe(const FakeCancel()), 'cancel');

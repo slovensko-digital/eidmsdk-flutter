@@ -9,7 +9,9 @@ enum FakeErrorCase {
   certificateReadFailed('certificateReadFailed', 'Certificate read failed'),
   signingFailed('signingFailed', 'Signing failed'),
   unsupportedSignatureScheme(
-      'unsupportedSignatureScheme', 'Unsupported signature scheme'),
+    'unsupportedSignatureScheme',
+    'Unsupported signature scheme',
+  ),
   kepPinInvalid('kepPinInvalid', 'KEP PIN invalid'),
   kepPinBlocked('kepPinBlocked', 'KEP PIN blocked'),
   tagConnectionLost('tagConnectionLost', 'Card connection lost'),
