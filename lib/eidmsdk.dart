@@ -53,6 +53,7 @@ class Eidmsdk {
   /// could not find one.
   static GlobalKey<NavigatorState>? get navigatorKey => FakeUi.navigatorKey;
 
+  /// Sets the [navigatorKey].
   static set navigatorKey(GlobalKey<NavigatorState>? key) =>
       FakeUi.navigatorKey = key;
 
@@ -98,8 +99,9 @@ class Eidmsdk {
   }
 
   /// Whether calls are being served by the fake [SimulatorEidmsdk].
-  static Future<bool> isUsingFake() async =>
-      await _platform() is SimulatorEidmsdk;
+  static Future<bool> isUsingFake() async {
+    return await _platform() is SimulatorEidmsdk;
+  }
 
   /// Clears the memoised platform and the [debugForceSimulator] override, so
   /// the next call resolves from scratch.
@@ -108,8 +110,6 @@ class Eidmsdk {
     _platformFuture = null;
     debugForceSimulator = null;
   }
-
-  // TODO Cleanup code - put await _platform() on new line each time
 
   /// Sets the native SDK's log verbosity.
   ///
@@ -120,8 +120,11 @@ class Eidmsdk {
   ///
   /// Unlike [getCertificates] and [signData], a native failure here is not
   /// translated — it surfaces as a raw [PlatformException].
-  Future<bool> setLogLevel({required EIDLogLevel logLevel}) async =>
-      (await _platform()).setLogLevel(logLevel: logLevel);
+  Future<bool> setLogLevel({required EIDLogLevel logLevel}) async {
+    final platform = await _platform();
+
+    return platform.setLogLevel(logLevel: logLevel);
+  }
 
   /// Presents the native SDK's tutorial on how to hold the card against the
   /// phone for NFC reading.
@@ -136,8 +139,11 @@ class Eidmsdk {
   ///
   /// As with [setLogLevel], a native failure surfaces as a raw
   /// [PlatformException] rather than an [EidmsdkException].
-  Future showTutorial({EIDLanguage? language}) async =>
-      (await _platform()).showTutorial(language: language);
+  Future showTutorial({EIDLanguage? language}) async {
+    final platform = await _platform();
+
+    return platform.showTutorial(language: language);
+  }
 
   /// Reads the signing certificates from the card.
   ///
@@ -158,10 +164,9 @@ class Eidmsdk {
     EIDLanguage? language,
   }) async {
     try {
-      return await (await _platform()).getCertificates(
-        type: type,
-        language: language,
-      );
+      final platform = await _platform();
+
+      return await platform.getCertificates(type: type, language: language);
     } on PlatformException catch (e) {
       decodeNativeError(e);
     }
@@ -196,7 +201,9 @@ class Eidmsdk {
     EIDLanguage? language,
   }) async {
     try {
-      return await (await _platform()).signData(
+      final platform = await _platform();
+
+      return await platform.signData(
         certIndex: certIndex,
         signatureScheme: signatureScheme,
         dataToSign: dataToSign,
