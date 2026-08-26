@@ -4,8 +4,15 @@ import 'package:eidmsdk/src/simulator/screens/certificates_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Future<FakeOutcome?> _open(WidgetTester tester) async {
+/// Holds the outcome popped by the pushed [CertificatesScreen], updated
+/// whenever the push future resolves -- which may be well after [_open]
+/// itself returns, once the test taps a button on the pushed screen.
+class _Push {
   FakeOutcome? outcome;
+}
+
+Future<_Push> _open(WidgetTester tester) async {
+  final push = _Push();
 
   await tester.pumpWidget(
     MaterialApp(
@@ -13,7 +20,7 @@ Future<FakeOutcome?> _open(WidgetTester tester) async {
         builder:
             (context) => TextButton(
               onPressed: () async {
-                outcome = await Navigator.of(context).push<FakeOutcome>(
+                push.outcome = await Navigator.of(context).push<FakeOutcome>(
                   MaterialPageRoute<FakeOutcome>(
                     builder: (_) => const CertificatesScreen(),
                   ),
@@ -27,7 +34,7 @@ Future<FakeOutcome?> _open(WidgetTester tester) async {
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
 
-  return outcome;
+  return push;
 }
 
 void main() {
@@ -40,27 +47,29 @@ void main() {
   });
 
   testWidgets('return certificate yields FakeProceed', (tester) async {
-    await _open(tester);
+    final push = await _open(tester);
 
     await tester.tap(find.text('Return certificate'));
     await tester.pumpAndSettle();
 
     expect(find.text('open'), findsOneWidget);
+    expect(push.outcome, isA<FakeProceed>());
   });
 
   testWidgets('cancel yields FakeCancel', (tester) async {
-    await _open(tester);
+    final push = await _open(tester);
 
     await tester.tap(find.text('Cancel'));
     await tester.pumpAndSettle();
 
     expect(find.text('open'), findsOneWidget);
+    expect(push.outcome, isA<FakeCancel>());
   });
 
   testWidgets('return error opens the picker and propagates the choice', (
     tester,
   ) async {
-    await _open(tester);
+    final push = await _open(tester);
 
     await tester.tap(find.text('Return error'));
     await tester.pumpAndSettle();
@@ -70,5 +79,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('open'), findsOneWidget);
+    expect(push.outcome, isA<FakeError>());
+    expect(
+      (push.outcome as FakeError).error,
+      FakeErrorCase.certificatesNotIssued,
+    );
   });
 }
