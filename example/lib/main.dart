@@ -63,8 +63,7 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 ElevatedButton(
-                  child: const Text(
-                      'signData(certIndex: 1, dataToSign: "hello world")'),
+                  child: const Text('signData("hello world") — opens fake UI'),
                   onPressed: () => _run(
                     context,
                     () => _eidmsdkPlugin.signData(
@@ -89,8 +88,8 @@ class HomePage extends StatelessWidget {
   }
 
   /// Runs [action] and surfaces whatever comes back -- including thrown
-  /// [EidmsdkException]s, which is how the simulator reports that signing is not
-  /// implemented.
+  /// [EidmsdkException]s, which is how errors picked on the fake's
+  /// error-picker screen are reported.
   Future<void> _run(
     BuildContext context,
     Future<dynamic> Function() action, {
@@ -154,7 +153,8 @@ class _FakeSdkBanner extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Text(
             'Simulator detected: using the FAKE eID SDK.\n'
-            'Certificates are canned and signing is not implemented.',
+            'Certificates and signatures are real crypto from a public, '
+            'worthless key — never trust them.',
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.orange.shade900),
           ),
