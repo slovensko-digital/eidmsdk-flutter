@@ -25,74 +25,69 @@ class SignScreen extends StatelessWidget {
     return FakeScaffold(
       title: 'Sign data',
       body: LayoutBuilder(
-        builder:
-            (context, constraints) => SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text(
-                        'Data to sign',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Container(
-                          padding: const EdgeInsets.all(12),
-                          color: const Color(0xFFF2F2F2),
-                          child: Text(
-                            dataPreview,
-                            maxLines: 6,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'monospace',
-                            ),
-                          ),
-                        ),
-                      ),
-                      Text(
-                        'certIndex: $certIndex\nscheme: $signatureScheme',
-                        style: const TextStyle(color: Colors.black54),
-                      ),
-                      const Spacer(),
-                      fakeButton(
-                        label: 'Sign',
-                        onPressed:
-                            () =>
-                                Navigator.of(context).pop(const FakeProceed()),
-                      ),
-                      fakeButton(
-                        label: 'Return error',
-                        onPressed: () async {
-                          final picked = await Navigator.of(
-                            context,
-                          ).push<FakeErrorCase>(
-                            MaterialPageRoute<FakeErrorCase>(
-                              builder: (_) => const ErrorPickerScreen(),
-                            ),
-                          );
-                          if (picked != null && context.mounted) {
-                            Navigator.of(context).pop(FakeError(picked));
-                          }
-                        },
-                      ),
-                      fakeButton(
-                        label: 'Cancel',
-                        onPressed:
-                            () => Navigator.of(context).pop(const FakeCancel()),
-                      ),
-                    ],
-                  ),
-                ),
+        builder: (context, constraints) {
+          return SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight),
+              child: IntrinsicHeight(child: _buildContent(context)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildContent(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text(
+          'Data to sign',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            color: const Color(0xFFF2F2F2),
+            child: Text(
+              dataPreview,
+              maxLines: 6,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Colors.black,
+                fontFamily: 'monospace',
               ),
             ),
-      ),
+          ),
+        ),
+        Text(
+          'certIndex: $certIndex\nscheme: $signatureScheme',
+          style: const TextStyle(color: Colors.black54),
+        ),
+        const Spacer(),
+        fakeButton(
+          label: 'Sign',
+          onPressed: () => Navigator.of(context).pop(const FakeProceed()),
+        ),
+        fakeButton(
+          label: 'Return error',
+          onPressed: () async {
+            final picked = await Navigator.of(context).push<FakeErrorCase>(
+              MaterialPageRoute<FakeErrorCase>(
+                builder: (_) => const ErrorPickerScreen(),
+              ),
+            );
+            if (picked != null && context.mounted) {
+              Navigator.of(context).pop(FakeError(picked));
+            }
+          },
+        ),
+        fakeButton(
+          label: 'Cancel',
+          onPressed: () => Navigator.of(context).pop(const FakeCancel()),
+        ),
+      ],
     );
   }
 }
