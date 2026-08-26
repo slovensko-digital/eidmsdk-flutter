@@ -17,10 +17,10 @@ unsupported API in `fake_ui.dart`, and why tests must set
 | --- | --- |
 | `fake_ui.dart` | Presents the screens with no help from the host app. Also holds `autoRespond`. |
 | `fake_outcome.dart` | Sealed `FakeProceed` / `FakeError` / `FakeCancel` — what the user picked. |
-| `fake_errors.dart` | Catalogue of real eID error codes the fake can raise. |
+| `fake_errors.dart` | Catalog of real eID error codes the fake can raise. |
 | `fake_identity.dart` | **Generated** by `tools/generate_fake_identity.sh` — the throwaway RSA-2048 keypair and certificate. Do not hand-edit. |
 | `fake_signer.dart` | RSA PKCS#1 v1.5 over SHA-256, mirroring what the real SDK is asked to do. |
-| `fake_platform.dart` | Which platform the fake pretends to be, so both cancellation behaviours are testable anywhere. |
+| `fake_platform.dart` | Which platform the fake pretends to be, so both cancellation behaviors are testable anywhere. |
 | `screens/` | The four screens — certificates, sign, tutorial, error picker — all wrapped in `fake_scaffold.dart`'s banner chrome. |
 
 Tests live in `test/simulator/`, mirroring this layout, with one widget test per

@@ -9,7 +9,7 @@
 /// — rather than catching the mapped exception types via
 /// `Eidmsdk.decodeNativeError` — will see iOS-shaped codes on an emulator that
 /// a real Android device would never produce. Going through
-/// `Eidmsdk.decodeNativeError`, as this catalogue's codes do, still lands on
+/// `Eidmsdk.decodeNativeError`, as this catalog's codes do, still lands on
 /// the same exception types either way. The labels are what the error-picker
 /// screen displays.
 enum FakeErrorCase {

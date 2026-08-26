@@ -62,6 +62,7 @@ class FakeUi {
   }
 
   /// Pushes [builder] for a screen with nothing to choose, such as the tutorial.
+  // TODO Rename this function
   static Future<void> presentTutorial(WidgetBuilder builder) async {
     if (autoRespond != null) {
       return;

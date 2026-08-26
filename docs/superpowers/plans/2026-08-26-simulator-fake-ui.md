@@ -32,7 +32,7 @@
 | `tools/generate_fake_identity.sh` | One-shot OpenSSL generation of the keypair + certificate; writes `fake_identity.dart` |
 | `lib/src/simulator/fake_identity.dart` | Generated constants: RSA components and certificate DER |
 | `lib/src/simulator/fake_signer.dart` | Decode `dataToSign`; RSA PKCS#1 v1.5 / SHA-256 signing |
-| `lib/src/simulator/fake_errors.dart` | Catalogue of real eID error codes offered by the picker |
+| `lib/src/simulator/fake_errors.dart` | Catalog of real eID error codes offered by the picker |
 | `lib/src/simulator/fake_outcome.dart` | Sealed `FakeProceed \| FakeError \| FakeCancel` |
 | `lib/src/simulator/fake_platform.dart` | Host-platform seam, overridable in tests |
 | `lib/src/simulator/fake_ui.dart` | Root-`Navigator` discovery, `navigatorKey` fallback, `autoRespond` |
@@ -470,7 +470,7 @@ and typed_data, all already present in any Flutter app."
 
 ---
 
-### Task 3: Outcomes, error catalogue, platform seam
+### Task 3: Outcomes, error catalog, platform seam
 
 Three small files that later tasks all depend on, plus the proof that the fake's error codes map to the same exceptions a real device produces.
 
@@ -556,7 +556,7 @@ void main() {
   group('FakeHostPlatform', () {
     tearDown(() => FakeHostPlatform.debugIsAndroidOverride = null);
 
-    test('honours the test override in both directions', () {
+    test('honors the test override in both directions', () {
       FakeHostPlatform.debugIsAndroidOverride = true;
       expect(FakeHostPlatform.isAndroid, isTrue);
 
@@ -646,7 +646,7 @@ import 'package:flutter/foundation.dart';
 
 /// Which host platform the fake is pretending to be.
 ///
-/// Exists so that platform-faithful behaviour — Android completing with `null`
+/// Exists so that platform-faithful behavior — Android completing with `null`
 /// on cancellation where iOS raises an error — can be tested on any machine.
 class FakeHostPlatform {
   FakeHostPlatform._();
@@ -668,7 +668,7 @@ Expected: PASS, 6 tests.
 
 ```bash
 git add lib/src/simulator/fake_errors.dart lib/src/simulator/fake_outcome.dart lib/src/simulator/fake_platform.dart test/simulator/fake_errors_test.dart
-git commit -m "Add outcome type, error catalogue and platform seam for the fake
+git commit -m "Add outcome type, error catalog and platform seam for the fake
 
 FakeOutcome is sealed so the orchestration switch is exhaustive and a future
 case is a compile error rather than a silent fallthrough.
@@ -679,7 +679,7 @@ test asserts the mapping through that real function, so the fake's errors
 cannot drift from the ones a device produces.
 
 FakeHostPlatform exists purely so the platform-faithful cancellation
-behaviour can be tested on either platform from any machine."
+behavior can be tested on either platform from any machine."
 ```
 
 ---
@@ -1305,7 +1305,7 @@ identical to what a real device would produce."
 - Consumes: `FakeIdentity` (Task 1), `FakeSigner.supportedSignatureScheme` (Task 2), `FakeOutcome`/`FakeErrorCase`/`FakeHostPlatform` (Task 3), `FakeUi.presentOutcome` (Task 4), `FakeScaffold`/`fakeButton` (Task 5), `ErrorPickerScreen` (Task 6).
 - Produces: `class CertificatesScreen extends StatelessWidget` with `const CertificatesScreen()`, popping a `FakeOutcome`.
 
-Note: the fake returns its single QES certificate regardless of the requested `types`, because there is exactly one hardcoded identity. This is a deliberate change from the previous behaviour of filtering by type.
+Note: the fake returns its single QES certificate regardless of the requested `types`, because there is exactly one hardcoded identity. This is a deliberate change from the previous behavior of filtering by type.
 
 - [ ] **Step 1: Write the failing screen test**
 
@@ -1552,7 +1552,7 @@ In `lib/eidmsdk_simulator.dart`, replace the `getCertificates` override with:
 
     return switch (outcome) {
       // There is exactly one hardcoded identity, so the requested types are
-      // not honoured: the QES certificate is always what comes back.
+      // not honored: the QES certificate is always what comes back.
       FakeProceed() => CertificatesInfo(
           qscd: true,
           cardType: 'eID (SIMULATOR)',
@@ -1766,7 +1766,7 @@ void main() {
     expect(_verifies('hello world', signature!), isTrue);
   });
 
-  test('honours isBase64Encoded', () async {
+  test('honors isBase64Encoded', () async {
     FakeUi.autoRespond = const FakeProceed();
 
     final signature = await platform.signData(
@@ -2189,7 +2189,7 @@ call time means a fake signature cannot be produced on a device even then."
 
 ### Task 10: Update the tests this work invalidates
 
-Two existing tests assert behaviour that is deliberately no longer true, and the example app needs its signing button to reflect that signing now works.
+Two existing tests assert behavior that is deliberately no longer true, and the example app needs its signing button to reflect that signing now works.
 
 **Files:**
 - Modify: `test/eidmsdk_simulator_test.dart`
@@ -2204,8 +2204,8 @@ Two existing tests assert behaviour that is deliberately no longer true, and the
 
 In `test/eidmsdk_simulator_test.dart`:
 
-- Delete the test `'signData throws rather than returning a fake signature'` — signing now succeeds, and `test/simulator/sign_data_test.dart` covers the new behaviour thoroughly.
-- Delete the tests `'getCertificates honours the requested types'` and `'certData is decodable but obviously not a real certificate'` — the fake now returns one real certificate regardless of the requested types, which `test/simulator/get_certificates_test.dart` covers.
+- Delete the test `'signData throws rather than returning a fake signature'` — signing now succeeds, and `test/simulator/sign_data_test.dart` covers the new behavior thoroughly.
+- Delete the tests `'getCertificates honors the requested types'` and `'certData is decodable but obviously not a real certificate'` — the fake now returns one real certificate regardless of the requested types, which `test/simulator/get_certificates_test.dart` covers.
 - The remaining tests call the fake without any UI, so add to `setUp`:
 
 ```dart

@@ -33,7 +33,7 @@ Autogram can build a real signature container from the result.
   plain, and deliberately marked as fake.
 - Qualified-certificate semantics (`qcStatements` and friends). Add only if a
   host app turns out to check them.
-- Any change to real-device behaviour. Nothing in this design executes on real
+- Any change to real-device behavior. Nothing in this design executes on real
   hardware.
 
 ## Decisions
@@ -46,7 +46,7 @@ because the reasoning is not obvious from the result.
 | Audience | Any consuming app, zero setup | Example-app-only would leave Autogram with no signing UI on a simulator; one-line setup breaks the zero-setup promise the auto-detection already makes, and an app that forgets the line gets a fake that silently cannot render. |
 | Presentation | Discover the host's root `Navigator`; optional `Eidmsdk.navigatorKey` fallback | Discovery alone leaves consumers stranded if a Flutter upgrade changes the element tree. An `OverlayEntry` avoids the host route stack but loses back-button handling and is awkward to drive from widget tests. |
 | Fidelity | Matched keypair; signature verifies against the returned certificate | A throwaway certificate breaks anything that parses it or checks the signer's public key — which is precisely what a document-signing app does. |
-| Outcomes | Platform-faithful, plus an error picker | Uniform behaviour hides the real SDK's cancel asymmetry, so an app that mishandles iOS cancellation would look correct on a simulator and fail on a device. |
+| Outcomes | Platform-faithful, plus an error picker | Uniform behavior hides the real SDK's cancel asymmetry, so an app that mishandles iOS cancellation would look correct on a simulator and fail on a device. |
 | Crypto location | Dart (`pointycastle`) | Native Swift + Kotlin avoids the dependency and would even compile out of iOS device builds, but the two platforms disagree on whether their signing API takes a digest or a message; getting that wrong yields signatures that silently verify against nothing. One implementation cannot drift from itself. |
 | Test bypass | `SimulatorEidmsdk.autoRespond` | Auto-detecting the test environment is implicit and surprising when someone actually wants to test the screens. |
 
@@ -67,7 +67,7 @@ lib/
   src/simulator/
     fake_ui.dart                root-Navigator discovery, push helper, key fallback
     fake_outcome.dart           sealed FakeProceed | FakeError | FakeCancel
-    fake_errors.dart            catalogue of real eID error codes
+    fake_errors.dart            catalog of real eID error codes
     fake_identity.dart          certificate (base64 DER) + private key components
     fake_signer.dart            RSA PKCS#1 v1.5 over SHA-256, via pointycastle
     screens/
@@ -163,7 +163,7 @@ returned as `certData` — and the private key as BigInt components (`n`, `d`,
 ASN.1 parsing code and no `basic_utils` dependency.
 
 `fake_signer.dart` mirrors the real plugin's semantics: decode `dataToSign`
-honouring `isBase64Encoded`, SHA-256 it, sign with
+honoring `isBase64Encoded`, SHA-256 it, sign with
 `RSASigner(SHA256Digest(), ...)` (which emits the correct PKCS#1 v1.5
 DigestInfo), and base64-encode the result.
 

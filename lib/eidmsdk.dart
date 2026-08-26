@@ -29,11 +29,11 @@ export 'types.dart';
 /// needs NFC and a physical card. Use [ensureInitialized] to get that decision
 /// out of the way early, and [isUsingFake] to ask which one you got.
 ///
-/// A number of behaviours genuinely differ between Android and iOS, because the
+/// A number of behaviors genuinely differ between Android and iOS, because the
 /// two native SDKs do. Those differences are called out per method — the
 /// cancellation ones in particular are easy to get wrong on one platform only.
 class Eidmsdk {
-  /// Memoised platform resolution.
+  /// Memoized platform resolution.
   ///
   /// The [EidmsdkPlatform.instance] getter is synchronous, but deciding whether
   /// this is a simulated host requires a round trip to the native side. Caching
@@ -103,7 +103,7 @@ class Eidmsdk {
     return await _platform() is SimulatorEidmsdk;
   }
 
-  /// Clears the memoised platform and the [debugForceSimulator] override, so
+  /// Clears the memoized platform and the [debugForceSimulator] override, so
   /// the next call resolves from scratch.
   @visibleForTesting
   static void resetForTesting() {
@@ -133,7 +133,7 @@ class Eidmsdk {
   /// Android, which launches the tutorial activity without waiting for it. Do
   /// not treat the returned future as "the user has finished reading".
   ///
-  /// [language] is honoured on Android and ignored on iOS.
+  /// [language] is honored on Android and ignored on iOS.
   ///
   /// On a simulator a placeholder screen stands in for the real tutorial.
   ///
@@ -150,7 +150,7 @@ class Eidmsdk {
   /// Presents the native SDK's card-reading UI, so the future stays pending
   /// while the user holds their card to the phone.
   ///
-  /// [type] selects which certificate to read. [language] is honoured on
+  /// [type] selects which certificate to read. [language] is honored on
   /// Android and ignored on iOS.
   ///
   /// Returns `null` when the user cancels — but on Android only. iOS reports a
@@ -184,7 +184,7 @@ class Eidmsdk {
   /// [certIndex] comes from [Certificate.certIndex] in a [getCertificates]
   /// result. [signatureScheme] is an OID string — `1.2.840.113549.1.1.11` is
   /// sha256WithRSAEncryption. Set [isBase64Encoded] when [dataToSign] is
-  /// base64 rather than plain text. [language] is honoured on Android and
+  /// base64 rather than plain text. [language] is honored on Android and
   /// ignored on iOS.
   ///
   /// Returns the signature as base64, or `null` when the user cancels — on

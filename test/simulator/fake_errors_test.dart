@@ -96,7 +96,7 @@ void main() {
   group('FakeHostPlatform', () {
     tearDown(() => FakeHostPlatform.debugIsAndroidOverride = null);
 
-    test('honours the test override in both directions', () {
+    test('honors the test override in both directions', () {
       FakeHostPlatform.debugIsAndroidOverride = true;
       expect(FakeHostPlatform.isAndroid, isTrue);
 

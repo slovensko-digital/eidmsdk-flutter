@@ -2,7 +2,7 @@
 
 **Breaking:** `getCertificates` now takes a single `type` instead of a
 `types` list. Android only ever supported one, and the list gave callers a
-shape the platform could not honour. Replace `types: [EIDCertificateIndex.qes]`
+shape the platform could not honor. Replace `types: [EIDCertificateIndex.qes]`
 with `type: EIDCertificateIndex.qes`.
 
 * Fix iOS requesting the wrong certificate. `eIDCertificateIndex` is 0-based, but
@@ -19,7 +19,7 @@ with `type: EIDCertificateIndex.qes`.
   certificate type rather than throwing `IndexOutOfBoundsException`.
 * **Breaking:** `language` is now an `EIDLanguage` (`slovak` / `english`) instead
   of a free-form `String`. It crosses the wire as the `sk` / `en` code the native
-  SDKs expect. Still honoured on Android and ignored on iOS.
+  SDKs expect. Still honored on Android and ignored on iOS.
 * Android reports a missing or wrongly-typed argument as `ERROR_PARSE_ARGUMENTS`,
   naming the argument, instead of throwing out of `onMethodCall` and leaving the
   Dart future to hang forever. `MethodCall.argument` casts without checking, so

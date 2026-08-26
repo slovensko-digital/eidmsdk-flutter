@@ -34,14 +34,14 @@ this file went stale repeatedly, and a symbol name survives edits.
       call overwrites the first and the earlier `Future` never completes. Two
       overlapping `signData` calls are enough to reproduce it.
 
-## Platform behaviour that disagrees
+## Platform behavior that disagrees
 
 - [ ] `showTutorial` completes immediately on Android — it calls
       `EIDHandler.startTutorial` and then `success(false)` without waiting —
       while iOS completes only after the tutorial is dismissed. Callers cannot
       treat the future as "the user has finished reading" on both platforms.
       Documented on `Eidmsdk.showTutorial`; the platforms should agree instead.
-- [ ] `EIDLanguage` is honoured on Android and ignored on iOS, which always uses
+- [ ] `EIDLanguage` is honored on Android and ignored on iOS, which always uses
       the device language. Documented, not fixed.
 
 ## API

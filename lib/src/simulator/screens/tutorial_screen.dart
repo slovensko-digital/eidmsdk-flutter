@@ -13,13 +13,17 @@ class TutorialScreen extends StatelessWidget {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'The real tutorial explains how to hold the card against the '
-            'phone for NFC reading. There is no NFC on a simulator, so this '
-            'screen only stands in for it.',
-            style: TextStyle(color: Colors.black),
+          const Expanded(
+            child: Center(
+              child: Text(
+                'The real tutorial explains how to hold the card against the '
+                'phone for NFC reading. There is no NFC on a simulator, so this '
+                'screen only stands in for it.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
           ),
-          const Spacer(),
           fakeButton(
             label: 'Close',
             onPressed: () => Navigator.of(context).pop(),

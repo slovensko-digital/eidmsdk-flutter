@@ -119,7 +119,7 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
 
     return switch (outcome) {
       // There is exactly one hardcoded identity, so the requested [type] is
-      // not honoured: the QES certificate is always what comes back.
+      // not honored: the QES certificate is always what comes back.
       FakeProceed() => const CertificatesInfo(
         qscd: true,
         cardType: 'eID (SIMULATOR)',

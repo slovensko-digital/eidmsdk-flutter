@@ -47,6 +47,7 @@ class FakeScaffold extends StatelessWidget {
 }
 
 /// A black filled button with a white label, per the agreed styling.
+// TODO Consider dropping this fakeButton and use any button on child Widgets, but specify colors via Theme
 Widget fakeButton({required String label, required VoidCallback onPressed}) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),

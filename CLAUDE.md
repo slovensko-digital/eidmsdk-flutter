@@ -42,7 +42,7 @@ A plugin wrapping the Slovak eID mSDK, which reads an ID card over NFC.
 Three layers: the `Eidmsdk` facade → the `EidmsdkPlatform` interface → one of two
 implementations. `MethodChannelEidmsdk` talks to the native SDKs;
 `SimulatorEidmsdk` is a fake. `Eidmsdk` picks between them once, on first call,
-memoising a `Future` (detection needs a native round trip but
+memoizing a `Future` (detection needs a native round trip but
 `EidmsdkPlatform.instance` is synchronous). Detection fails closed — any error
 keeps the real implementation, so the fake can never stand in on hardware.
 
@@ -57,7 +57,7 @@ solve that:
   `tools/build_eid_stub.sh`. **Re-run that script after any vendor SDK update.**
   The stub only needs to compile and link — it is never reached at runtime.
 - `SimulatorEidmsdk` (`lib/eidmsdk_simulator.dart` + `lib/src/simulator/`)
-  supplies the behaviour, and covers the Android emulator too, which has no NFC
+  supplies the behavior, and covers the Android emulator too, which has no NFC
   either.
 
 The fake presents real Flutter screens from a package that owns no
@@ -87,14 +87,14 @@ Keeping that per-SDK, rather than as an offset computed in Dart, is what removed
 a long-standing off-by-one. `test/eidmsdk_method_channel_test.dart` pins the wire
 contract; a change there silently breaks one platform.
 
-### Platform behaviour that genuinely differs
+### Platform behavior that genuinely differs
 
 These are real and documented on the methods — not bugs to "fix" by unifying:
 
 - **Cancellation:** Android completes with `null`; iOS raises an error that
   surfaces as `EidmsdkException`. Code handling only one breaks on the other.
 - **`showTutorial`:** resolves after dismissal on iOS, immediately on Android.
-- **`EIDLanguage`:** honoured on Android, ignored on iOS.
+- **`EIDLanguage`:** honored on Android, ignored on iOS.
 - **`setLogLevel`:** a logged no-op returning `false` on Android.
 
 `setLogLevel` and `showTutorial` are not wrapped in `decodeNativeError`, so they
@@ -103,6 +103,11 @@ surface raw `PlatformException`s unlike the other two.
 ## Conventions
 
 - Anything under `lib/src/` is private; only `lib/eidmsdk.dart` adds exports.
+- **Comments, doc comments, Markdown and test descriptions use American English**
+  — `behavior`, `honored`, `catalog`, `memoized`, `labeled`, `center`. Identifiers
+  are exempt where the spelling is a wire value or a vendor API: `cancelledByUser`
+  is the iOS `eIDError` case name and must keep its spelling, as must the
+  `'Cancelled by user'` label that mirrors it.
 - Tests that call into the plugin must set `SimulatorEidmsdk.autoRespond`, or the
   fake's blocking screens hang them. It is ignored in release builds, so a
   release can never suppress the on-screen fake banner.

@@ -111,7 +111,7 @@ tearDown(() => SimulatorEidmsdk.autoRespond = null);
 Use `FakeError(FakeErrorCase.signingFailed)` or `FakeCancel()` to drive the
 other branches. Leave it unset to exercise the screens with a `WidgetTester`.
 `autoRespond` is ignored in release builds, so a release app always presents
-the labelled screen — this is what keeps the fake from producing a silent,
+the labeled screen — this is what keeps the fake from producing a silent,
 unmarked signature if it were ever left set outside a test.
 
 `SimulatorEidmsdk` also refuses to run at all outside a simulator or emulator,

@@ -16,7 +16,7 @@ enum EIDCertificateIndex { qes, es, encryption }
 
 /// Language the native SDK presents its own UI in.
 ///
-/// Honoured on Android; iOS ignores it and uses the device language.
+/// Honored on Android; iOS ignores it and uses the device language.
 enum EIDLanguage {
   slovak('sk'),
   english('en');

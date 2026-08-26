@@ -36,8 +36,8 @@ void main() {
       // getCertificates presents an interactive fake screen, so these tests,
       // which call the fake without any UI, short-circuit straight to
       // success. The two tests this made false — that the requested types
-      // are honoured, and that certData is an obvious placeholder — are gone;
-      // test/simulator/get_certificates_test.dart covers the real behaviour.
+      // are honored, and that certData is an obvious placeholder — are gone;
+      // test/simulator/get_certificates_test.dart covers the real behavior.
       setUp(() {
         SimulatorEidmsdk.autoRespond = const FakeProceed();
       });
@@ -85,7 +85,7 @@ void main() {
 
     group('signData', () {
       // signData presents an interactive fake screen and produces a real
-      // signature. The full behaviour -- including that the signature
+      // signature. The full behavior -- including that the signature
       // actually verifies against the certificate -- is covered by
       // test/simulator/sign_data_test.dart.
       setUp(() {

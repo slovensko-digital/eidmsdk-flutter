@@ -96,7 +96,7 @@ cp "$TMP/${SIM_ARCHS[0]}/eID-Swift.h" "$SIM_FW/Headers/eID-Swift.h"
 # Mirror the device slice's modulemap verbatim.
 cp "$DEVICE_FW/Modules/module.modulemap" "$SIM_FW/Modules/module.modulemap"
 
-# Versions are kept identical to the device slice so the two stay recognisably
+# Versions are kept identical to the device slice so the two stay recognizably
 # the same SDK; only the platform differs. No resources: the stub renders no UI,
 # so Assets.car / tutorial.json / storyboards / *.lproj are all omitted.
 DEV_PLIST="$DEVICE_FW/Info.plist"

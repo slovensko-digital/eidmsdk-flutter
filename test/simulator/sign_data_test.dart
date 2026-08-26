@@ -58,7 +58,7 @@ void main() {
     },
   );
 
-  test('honours isBase64Encoded', () async {
+  test('honors isBase64Encoded', () async {
     FakeUi.autoRespond = const FakeProceed();
 
     final signature = await platform.signData(
