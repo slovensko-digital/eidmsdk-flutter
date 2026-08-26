@@ -20,6 +20,28 @@ void main() {
       expect(codes.toSet().length, codes.length);
     });
 
+    test('codes match expected literals exactly', () {
+      // Pin each code to its expected string. This catches transcription errors
+      // that the uniqueness test cannot, since any string is "unique" if written
+      // consistently. These strings must match what the native SDKs report.
+      const expectedCodes = <FakeErrorCase, String>{
+        FakeErrorCase.certificatesNotIssued: 'certificatesNotIssued',
+        FakeErrorCase.cancelledByUser: 'cancelledByUser',
+        FakeErrorCase.certificateReadFailed: 'certificateReadFailed',
+        FakeErrorCase.signingFailed: 'signingFailed',
+        FakeErrorCase.unsupportedSignatureScheme: 'unsupportedSignatureScheme',
+        FakeErrorCase.kepPinInvalid: 'kepPinInvalid',
+        FakeErrorCase.kepPinBlocked: 'kepPinBlocked',
+        FakeErrorCase.tagConnectionLost: 'tagConnectionLost',
+        FakeErrorCase.sessionTimeout: 'sessionTimeout',
+        FakeErrorCase.nfcNotSupported: 'nfcNotSupported',
+      };
+
+      for (final MapEntry(key: c, value: expected) in expectedCodes.entries) {
+        expect(c.code, expected, reason: 'code for ${c.name}');
+      }
+    });
+
     test('certificatesNotIssued maps to CertificateNotFoundException', () {
       // Routed through the real mapping the plugin uses for device errors, so
       // the fake cannot drift from it.
@@ -30,12 +52,16 @@ void main() {
       );
     });
 
-    test('other cases map to EidmsdkException', () {
+    test('other cases map to EidmsdkException, not CertificateNotFoundException',
+        () {
       for (final c in FakeErrorCase.values
           .where((c) => c != FakeErrorCase.certificatesNotIssued)) {
         expect(
           () => Eidmsdk.decodeNativeError(PlatformException(code: c.code)),
-          throwsA(isA<EidmsdkException>()),
+          throwsA(allOf(
+            isA<EidmsdkException>(),
+            isNot(isA<CertificateNotFoundException>()),
+          )),
           reason: c.name,
         );
       }
