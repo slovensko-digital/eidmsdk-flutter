@@ -1,10 +1,14 @@
-import 'dart:convert' show base64Encode, utf8;
-
-import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 import 'eidmsdk_platform_interface.dart';
 import 'errors.dart';
+import 'src/simulator/fake_errors.dart';
+import 'src/simulator/fake_identity.dart';
+import 'src/simulator/fake_outcome.dart';
+import 'src/simulator/fake_platform.dart';
+import 'src/simulator/fake_signer.dart';
 import 'src/simulator/fake_ui.dart';
+import 'src/simulator/screens/certificates_screen.dart';
 import 'src/simulator/screens/tutorial_screen.dart';
 import 'types.dart';
 
@@ -32,24 +36,10 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
   /// loading states are actually exercised instead of resolving instantly.
   static const _latency = Duration(milliseconds: 400);
 
-  /// Obviously-not-a-certificate placeholder. It is valid base64 so that callers
-  /// which merely decode it still work, but anything that genuinely parses X.509
-  /// will fail loudly rather than quietly trust fake material.
-  static final String _fakeCertData = base64Encode(
-    utf8.encode('FAKE-SIMULATOR-CERTIFICATE'),
-  );
-
-  static Certificate _certificate(EIDCertificateIndex type) => Certificate(
-    slot: switch (type) {
-      EIDCertificateIndex.qes => 'QES',
-      EIDCertificateIndex.es => 'ES',
-      EIDCertificateIndex.encryption => 'Encryption',
-    },
-    supportedSchemes: const ['1.2.840.113549.1.1.11'],
-    isQualified: type == EIDCertificateIndex.qes,
-    certIndex: type.index + 1,
-    certData: _fakeCertData,
-  );
+  /// Verbatim from the native implementations, so a host app sees the same
+  /// message it would see from a real device.
+  static const String _certificatesErrorMessage =
+      'Chyba pri načítaní podpisového certifikátu.';
 
   @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async => true;
@@ -66,22 +56,39 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     required List<EIDCertificateIndex> types,
     String? language,
   }) async {
-    await Future.delayed(_latency);
-
-    if (types.length > 1) {
-      // Android's native implementation requires exactly one type. Warn rather
-      // than throw: a simulator should not be where that constraint is first met.
-      debugPrint(
-        'eidmsdk: getCertificates() was called with ${types.length} '
-        'types. Android supports only one, so this would fail on a device.',
-      );
-    }
-
-    return CertificatesInfo(
-      qscd: true,
-      cardType: 'eID (SIMULATOR)',
-      certificates: types.map(_certificate).toList(),
+    final outcome = await FakeUi.presentOutcome(
+      (_) => const CertificatesScreen(),
     );
+
+    return switch (outcome) {
+      // There is exactly one hardcoded identity, so the requested types are
+      // not honoured: the QES certificate is always what comes back.
+      FakeProceed() => CertificatesInfo(
+        qscd: true,
+        cardType: 'eID (SIMULATOR)',
+        certificates: [
+          Certificate(
+            slot: 'QES',
+            supportedSchemes: const [FakeSigner.supportedSignatureScheme],
+            isQualified: true,
+            certIndex: 1,
+            certData: FakeIdentity.certificateBase64,
+          ),
+        ],
+      ),
+      FakeError(error: final error) =>
+        throw PlatformException(
+          code: error.code,
+          message: _certificatesErrorMessage,
+        ),
+      FakeCancel() =>
+        FakeHostPlatform.isAndroid
+            ? null
+            : throw PlatformException(
+              code: FakeErrorCase.cancelledByUser.code,
+              message: _certificatesErrorMessage,
+            ),
+    };
   }
 
   @override
