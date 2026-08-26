@@ -81,21 +81,32 @@ void main() {
       });
     });
 
-    test('signData throws rather than returning a fake signature', () async {
-      expect(
-        () => platform.signData(
+    group('signData', () {
+      // signData now presents an interactive fake screen and produces a real
+      // signature (Task 8), so it no longer throws "not implemented". This
+      // uses the internal FakeUi API rather than the not-yet-public
+      // SimulatorEidmsdk.autoRespond, which Task 9 adds; Task 10 is expected
+      // to rework this file onto that public surface once it exists. The
+      // full behaviour -- including that the signature actually verifies
+      // against the certificate -- is covered by
+      // test/simulator/sign_data_test.dart.
+      setUp(() {
+        FakeUi.autoRespond = const FakeProceed();
+      });
+
+      tearDown(() {
+        FakeUi.autoRespond = null;
+      });
+
+      test('returns a non-null signature', () async {
+        final signature = await platform.signData(
           certIndex: 1,
           signatureScheme: '1.2.840.113549.1.1.11',
           dataToSign: 'hello world',
-        ),
-        throwsA(
-          isA<EidmsdkException>().having(
-            (e) => e.message,
-            'message',
-            contains('not implemented'),
-          ),
-        ),
-      );
+        );
+
+        expect(signature, isNotNull);
+      });
     });
   });
 }

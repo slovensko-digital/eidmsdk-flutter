@@ -1,7 +1,6 @@
 import 'package:flutter/services.dart';
 
 import 'eidmsdk_platform_interface.dart';
-import 'errors.dart';
 import 'src/simulator/fake_errors.dart';
 import 'src/simulator/fake_identity.dart';
 import 'src/simulator/fake_outcome.dart';
@@ -9,6 +8,7 @@ import 'src/simulator/fake_platform.dart';
 import 'src/simulator/fake_signer.dart';
 import 'src/simulator/fake_ui.dart';
 import 'src/simulator/screens/certificates_screen.dart';
+import 'src/simulator/screens/sign_screen.dart';
 import 'src/simulator/screens/tutorial_screen.dart';
 import 'types.dart';
 
@@ -32,14 +32,14 @@ import 'types.dart';
 ///  * Android's "user cancelled" behaviour of completing with `null`,
 ///  * the tutorial UI.
 class SimulatorEidmsdk extends EidmsdkPlatform {
-  /// Stand-in for the round trip through the SDK's own UI, so that callers'
-  /// loading states are actually exercised instead of resolving instantly.
-  static const _latency = Duration(milliseconds: 400);
-
   /// Verbatim from the native implementations, so a host app sees the same
   /// message it would see from a real device.
   static const String _certificatesErrorMessage =
       'Chyba pri načítaní podpisového certifikátu.';
+
+  /// Verbatim from the native implementations, so a host app sees the same
+  /// message it would see from a real device.
+  static const String _signErrorMessage = 'Chyba pri podpisovaní.';
 
   @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async => true;
@@ -99,15 +99,37 @@ class SimulatorEidmsdk extends EidmsdkPlatform {
     bool isBase64Encoded = false,
     String? language,
   }) async {
-    await Future.delayed(_latency);
+    if (signatureScheme != FakeSigner.supportedSignatureScheme) {
+      throw PlatformException(
+        code: FakeErrorCase.unsupportedSignatureScheme.code,
+        message: _signErrorMessage,
+      );
+    }
 
-    // Signing with a hardcoded keystore and private certificate is not wired up
-    // yet; it will be implemented here. Until then this throws rather than
-    // returning a placeholder, so a fake signature can never be mistaken for a
-    // real one.
-    throw EidmsdkException(
-      'signData is not implemented on the simulator/emulator '
-      '- a fake keystore and certificate are not wired up yet.',
+    final data = FakeSigner.decodeDataToSign(
+      dataToSign,
+      isBase64Encoded: isBase64Encoded,
     );
+
+    final outcome = await FakeUi.presentOutcome(
+      (_) => SignScreen(
+        dataPreview: dataToSign,
+        certIndex: certIndex,
+        signatureScheme: signatureScheme,
+      ),
+    );
+
+    return switch (outcome) {
+      FakeProceed() => FakeSigner.signBase64(data),
+      FakeError(error: final error) =>
+        throw PlatformException(code: error.code, message: _signErrorMessage),
+      FakeCancel() =>
+        FakeHostPlatform.isAndroid
+            ? null
+            : throw PlatformException(
+              code: FakeErrorCase.cancelledByUser.code,
+              message: _signErrorMessage,
+            ),
+    };
   }
 }
