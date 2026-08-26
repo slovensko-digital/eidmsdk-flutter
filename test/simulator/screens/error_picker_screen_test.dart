@@ -16,19 +16,23 @@ void main() {
   testWidgets('pops the picked case', (tester) async {
     FakeErrorCase? picked;
 
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (context) => TextButton(
-          onPressed: () async {
-            picked = await Navigator.of(context).push<FakeErrorCase>(
-              MaterialPageRoute<FakeErrorCase>(
-                  builder: (_) => const ErrorPickerScreen()),
-            );
-          },
-          child: const Text('open'),
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder:
+              (context) => TextButton(
+                onPressed: () async {
+                  picked = await Navigator.of(context).push<FakeErrorCase>(
+                    MaterialPageRoute<FakeErrorCase>(
+                      builder: (_) => const ErrorPickerScreen(),
+                    ),
+                  );
+                },
+                child: const Text('open'),
+              ),
         ),
       ),
-    ));
+    );
 
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
