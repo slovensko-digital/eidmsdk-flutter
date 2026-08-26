@@ -28,6 +28,8 @@ openssl req -x509 -newkey rsa:2048 \
 
 openssl x509 -in "$TMP/cert.pem" -outform DER -out "$TMP/cert.der"
 
+mkdir -p "$(dirname "$OUT")"
+
 OUT="$OUT" python3 - "$TMP" <<'PY'
 import base64, os, pathlib, re, subprocess, sys
 
@@ -45,8 +47,10 @@ def component(label):
 
 
 def wrap(hex_digits):
+    # 4-space continuation indent matches what `dart format` produces for a
+    # wrapped function-call argument, so the generated file is format-stable.
     chunks = [hex_digits[i:i + 64] for i in range(0, len(hex_digits), 64)]
-    return "\n      '".join(f"{c}'" for c in chunks)
+    return "\n    '".join(f"{c}'" for c in chunks)
 
 
 der = (tmp / 'cert.der').read_bytes()
@@ -76,20 +80,24 @@ class FakeIdentity {{
   static const String subjectCountry = 'SK';
 
   static final BigInt modulus = BigInt.parse(
-      '{wrap(component('modulus'))},
-      radix: 16);
+    '{wrap(component('modulus'))},
+    radix: 16,
+  );
 
   static final BigInt privateExponent = BigInt.parse(
-      '{wrap(component('privateExponent'))},
-      radix: 16);
+    '{wrap(component('privateExponent'))},
+    radix: 16,
+  );
 
   static final BigInt prime1 = BigInt.parse(
-      '{wrap(component('prime1'))},
-      radix: 16);
+    '{wrap(component('prime1'))},
+    radix: 16,
+  );
 
   static final BigInt prime2 = BigInt.parse(
-      '{wrap(component('prime2'))},
-      radix: 16);
+    '{wrap(component('prime2'))},
+    radix: 16,
+  );
 
   static final BigInt publicExponent = BigInt.from(65537);
 
