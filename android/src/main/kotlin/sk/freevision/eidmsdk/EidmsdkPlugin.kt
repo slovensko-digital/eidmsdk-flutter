@@ -1,6 +1,7 @@
 package sk.freevision.eidmsdk
 
 import android.content.Intent
+import android.os.Build
 import android.util.Base64
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -98,22 +99,27 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     override fun onMethodCall(call: MethodCall, result: Result) {
         Log.d(TAG, "onMethodCall: call=(method=${call.method}, arguments=${call.arguments})")
 
-        // Every method call arguments expected it to be Map<String, Any?>
-        if (call.arguments !is Map<*, *>) {
-            // TODO use custom .error() fun with IllegalArgumentException
-            result.error(
-                /* errorCode = */ "ERROR_PARSE_ARGUMENTS",
-                /* errorMessage = */ "Error parsing arguments",
-                /* errorDetails = */ call.arguments.toString(),
-            )
+        // Answered before the argument check below, because it takes no arguments.
+        if (call.method == "isSimulator") {
+            result.success(isEmulator())
             return
         }
 
-        when (call.method) {
-            "getPlatformVersion" -> result.success("Android ${android.os.Build.VERSION.RELEASE}")
+        // Every method call's arguments are expected to be Map<String, Any?>
+        if (call.arguments !is Map<*, *>) {
+            result.errorParsingArguments(call.arguments.toString())
 
+            return
+        }
+
+        // Required arguments go through [requiredArgument] rather than !! so that
+        // a missing or wrongly-typed one reports a channel error the Dart side
+        // can catch, instead of throwing out of onMethodCall where nothing
+        // handles it and the awaiting Future never completes.
+        when (call.method) {
             "setLogLevel" -> result.setLogLevel(
-                logLevel = call.argument("logLevel")!!,
+                logLevel = call.requiredArgument<Int>("logLevel")
+                    ?: return result.errorParsingArguments("logLevel"),
             )
 
             "showTutorial" -> result.showTutorial(
@@ -121,21 +127,46 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             )
 
             "getCertificates" -> result.getCertificates(
-                types = call.argument("types")!!,
+                type = call.requiredArgument<Int>("type")
+                    ?: return result.errorParsingArguments("type"),
                 language = call.argument("language"),
             )
 
             "signData" -> result.signData(
-                certIndex = call.argument("certIndex")!!,
-                signatureScheme = call.argument("signatureScheme")!!,
-                dataToSign = call.argument("dataToSign")!!,
-                isBase64Encoded = call.argument("isBase64Encoded")!!,
+                certIndex = call.requiredArgument<Int>("certIndex")
+                    ?: return result.errorParsingArguments("certIndex"),
+                signatureScheme = call.requiredArgument<String>("signatureScheme")
+                    ?: return result.errorParsingArguments("signatureScheme"),
+                dataToSign = call.requiredArgument<String>("dataToSign")
+                    ?: return result.errorParsingArguments("dataToSign"),
+                isBase64Encoded = call.requiredArgument<Boolean>("isBase64Encoded")
+                    ?: return result.errorParsingArguments("isBase64Encoded"),
                 language = call.argument("language"),
             )
 
             else -> result.notImplemented()
         }
     }
+
+    /**
+     * Whether this build is running on an emulator rather than a real device.
+     *
+     * The eID mSDK needs NFC and a physical ID card, so on an emulator the Dart
+     * side substitutes a fake implementation. Heuristic by necessity -- there is
+     * no supported API for this -- but it only ever needs to be correct in the
+     * negative direction: a false positive on real hardware would let a fake
+     * implementation run, so the checks below are deliberately restricted to
+     * markers that shipping devices do not carry.
+     */
+    private fun isEmulator(): Boolean =
+        Build.HARDWARE in setOf("goldfish", "ranchu", "gce_x86") ||
+            Build.FINGERPRINT.startsWith("generic") ||
+            Build.FINGERPRINT.startsWith("unknown") ||
+            Build.MODEL.startsWith("sdk_gphone") ||
+            Build.MODEL.contains("Emulator") ||
+            Build.MODEL.contains("Android SDK built for") ||
+            Build.PRODUCT == "google_sdk" ||
+            Build.MANUFACTURER.contains("Genymotion")
 
     private fun Result.setLogLevel(@Suppress("UNUSED_PARAMETER") logLevel: Int) {
         Log.w(TAG, "Not supported in Android.")
@@ -153,9 +184,19 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         success(false)
     }
 
-    private fun Result.getCertificates(types: Collection<Int>, language: String?) {
-        val type = requireNotNull(types.singleOrNull()) { "types has to contain exactly single int value." }
-        val certificateType = EIDCertificateType.values()[type]
+    private fun Result.getCertificates(type: Int, language: String?) {
+        // The wire value is the Dart EIDCertificateIndex index (qes = 0), while
+        // EIDCertificateType leads with an extra ALL member, so shift past it.
+        val certificateType = EIDCertificateType.entries.getOrNull(type + 1)
+        if (certificateType == null) {
+            error(
+                /* errorCode = */ "ERROR_INVALID_CERTIFICATE_TYPE",
+                /* errorMessage = */ "Unknown certificate type",
+                /* errorDetails = */ type.toString(),
+            )
+
+            return
+        }
 
         getCertificatesResult = this
 
@@ -227,6 +268,26 @@ class EidmsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     companion object {
         private const val TAG: String = "EidmsdkPlugin"
+    }
+
+    /**
+     * Reads argument [name], or `null` when it is absent or not a [T].
+     *
+     * [MethodCall.argument] casts without checking, so under erasure a value of
+     * the wrong type is handed back as if it were a [T] and only fails later,
+     * as a `ClassCastException` from wherever it is finally used. Reading it as
+     * [Any] and applying `as?` makes that check happen here instead.
+     */
+    private inline fun <reified T : Any> MethodCall.requiredArgument(name: String): T? =
+        argument<Any?>(name) as? T
+
+    /** Reports an argument that is missing, null, or of the wrong type. */
+    private fun Result.errorParsingArguments(details: String) {
+        error(
+            /* errorCode = */ "ERROR_PARSE_ARGUMENTS",
+            /* errorMessage = */ "Error parsing arguments",
+            /* errorDetails = */ details,
+        )
     }
 
     /** Universal error handler for any [Throwable]. */

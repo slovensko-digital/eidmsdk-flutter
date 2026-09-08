@@ -1,5 +1,4 @@
 import 'dart:convert' show jsonDecode;
-import 'dart:io' show Platform;
 
 import 'package:eidmsdk/types.dart';
 import 'package:flutter/foundation.dart';
@@ -13,6 +12,16 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   @visibleForTesting
   final methodChannel = const MethodChannel('eidmsdk');
 
+  /// Whether the host is an iOS Simulator or an Android emulator.
+  ///
+  /// Deliberately not on [EidmsdkPlatform]: this is a method-channel concern,
+  /// and no other implementation needs to answer it.
+  Future<bool> isSimulator() async {
+    final result = await methodChannel.invokeMethod<bool>('isSimulator');
+
+    return result ?? false;
+  }
+
   @override
   Future<bool> setLogLevel({required EIDLogLevel logLevel}) async {
     final arguments = {
@@ -25,9 +34,9 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
   }
 
   @override
-  Future showTutorial({String? language}) async {
+  Future showTutorial({EIDLanguage? language}) async {
     final arguments = {
-      "language": language,
+      "language": language?.code,
     };
 
     return await methodChannel.invokeMethod<bool>('showTutorial', arguments);
@@ -35,17 +44,17 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
 
   @override
   Future<CertificatesInfo?> getCertificates({
-    required List<EIDCertificateIndex> types,
-    String? language,
+    required EIDCertificateIndex type,
+    EIDLanguage? language,
   }) async {
-    // TODO Unify type param:
-    // iOS:     ---  QES, ES, Encryption
-    // Android: ALL, QES, ES, ENC
-
-    final offset = (Platform.isAndroid ? 1 : 0); // need to shift "ALL"
+    // The wire value is this enum's own index; each native side maps it to
+    // whatever its SDK expects. iOS indexes eIDCertificateIndex directly, while
+    // Android shifts past the extra leading ALL member of EIDCertificateType.
+    // Keeping that mapping native-side is what lets this be one plain value
+    // rather than a platform-dependent offset computed here.
     final arguments = {
-      "types": types.map((e) => e.index + offset).toList(),
-      "language": language,
+      "type": type.index,
+      "language": language?.code,
     };
     final jsonData =
         await methodChannel.invokeMethod<String>('getCertificates', arguments);
@@ -62,14 +71,14 @@ class MethodChannelEidmsdk extends EidmsdkPlatform {
     required String signatureScheme,
     required String dataToSign,
     bool isBase64Encoded = false,
-    String? language,
+    EIDLanguage? language,
   }) async {
     final arguments = {
       "certIndex": certIndex,
       "signatureScheme": signatureScheme,
       "dataToSign": dataToSign,
       "isBase64Encoded": isBase64Encoded,
-      "language": language,
+      "language": language?.code,
     };
     final signedData =
         await methodChannel.invokeMethod<String>('signData', arguments);

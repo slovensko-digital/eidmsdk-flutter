@@ -67,6 +67,10 @@ android {
     }
 
     testOptions {
+        // The plugin logs via android.util.Log, which is not implemented in the
+        // JVM stubs used for unit tests and throws "not mocked" without this.
+        unitTests.returnDefaultValues = true
+
         unitTests.all {
             useJUnitPlatform()
 

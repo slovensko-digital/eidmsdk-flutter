@@ -1,5 +1,5 @@
 PODS:
-  - eidmsdk (0.9.1):
+  - eidmsdk (1.0.0):
     - Flutter
     - JWTDecode
     - lottie-ios
@@ -7,9 +7,9 @@ PODS:
   - Flutter (1.0.0)
   - integration_test (0.0.1):
     - Flutter
-  - JWTDecode (2.6.3)
-  - lottie-ios (4.4.0)
-  - OpenSSL-Universal (1.1.2200)
+  - JWTDecode (4.0.0)
+  - lottie-ios (4.6.0)
+  - OpenSSL-Universal (3.6.2000)
 
 DEPENDENCIES:
   - eidmsdk (from `.symlinks/plugins/eidmsdk/ios`)
@@ -31,12 +31,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/integration_test/ios"
 
 SPEC CHECKSUMS:
-  eidmsdk: 929b6b08ac58a2d4322781ed54ad507e2fcf5434
+  eidmsdk: 516eacb5a5389bd4e7b0ea6f987381b04ef3e26c
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
-  JWTDecode: 33e5e26e5ddbd21b2065820894c08fef0cad9509
-  lottie-ios: ef1be1f90d54255f08e09d767950e43714661178
-  OpenSSL-Universal: 6e1ae0555546e604dbc632a2b9a24a9c46c41ef6
+  JWTDecode: a420459e8c73d7840cb6a6a7a1eb89c894d58499
+  lottie-ios: 8f959969761e9c45d70353667d00af0e5b9cadb3
+  OpenSSL-Universal: ecee7b138fa75a74ecf00d7ffd248fb584739b9e
 
 PODFILE CHECKSUM: 1959d098c91d8a792531a723c4a9d7e9f6a01e38
 

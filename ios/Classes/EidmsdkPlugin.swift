@@ -17,6 +17,17 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    // Answered before the argument check below, because it takes no arguments.
+    // This is a compile-time answer, so it can never report true on real hardware.
+    if call.method == "isSimulator" {
+      #if targetEnvironment(simulator)
+        result(true)
+      #else
+        result(false)
+      #endif
+      return
+    }
+
     guard let args = call.arguments as? [AnyHashable: Any] else {
       result(FlutterError(code: "ERROR_PARSE_ARGUMENTS", message: "Error parsing arguments", details: call.arguments.debugDescription))
       return
@@ -42,28 +53,48 @@ public class EidmsdkPlugin: NSObject, FlutterPlugin {
       return
     }
 
-    eidHandler.setLogLevel(eIDLogLevel(rawValue: rawLogLevel + 1)!)
+    // eIDLogLevel is 0-based (verbose = 0 ... none = 5) and EIDLogLevel on the
+    // Dart side has the same members in the same order, so the index maps
+    // straight across. It previously added 1 here, which shifted every level by
+    // one and made `none` produce rawValue 6 -- nil, then a force-unwrap crash.
+    guard let logLevel = eIDLogLevel(rawValue: rawLogLevel) else {
+      result(FlutterError(code: "ERROR_INVALID_LOG_LEVEL",
+                          message: "Unknown log level",
+                          details: rawLogLevel))
+      return
+    }
+
+    eidHandler.setLogLevel(logLevel)
 
     result(true)
   }
 
   public func showTutorial(result: @escaping FlutterResult) {
-    eidHandler.showTutorial(from: findViewController(), environment: .minvProd,) {
+    eidHandler.showTutorial(from: findViewController(), environment: .minvProd) {
       result(nil)
     }
   }
 
   public func getCertificates(args: [AnyHashable: Any], result: @escaping FlutterResult) {
-    guard let rawTypes = args["types"] as? [Int] else {
-      print("\(String(describing: args["types"])) couldn't be converted to types")
+    guard let rawType = args["type"] as? Int else {
+      result(FlutterError(code: "ERROR_PARSE_ARGUMENTS",
+                          message: "Error parsing arguments",
+                          details: "type"))
       return
     }
 
-    let types: [eIDCertificateIndex] = rawTypes.map { type in
-      eIDCertificateIndex(rawValue: type + 1)
-    }.compactMap { $0 }
+    // eIDCertificateIndex is 0-based (QES = 0, ES = 1, Encryption = 2) and
+    // matches EIDCertificateIndex on the Dart side member for member, so the
+    // index maps straight across. It previously added 1 here, which asked for ES
+    // when the caller wanted QES and silently dropped Encryption altogether.
+    guard let type = eIDCertificateIndex(rawValue: rawType) else {
+      result(FlutterError(code: "ERROR_INVALID_CERTIFICATE_TYPE",
+                          message: "Unknown certificate type",
+                          details: rawType))
+      return
+    }
 
-    eidHandler.getCertificates(from: findViewController(), types: types) { res in
+    eidHandler.getCertificates(from: findViewController(), types: [type]) { res in
       switch res {
       case .success(let certificatesJSONString):
         result(certificatesJSONString)
